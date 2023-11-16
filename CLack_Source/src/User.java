@@ -1,13 +1,13 @@
 
 
 public class User {
-    private String userID;
+    	private String userID;
 	private String username;
 	private String password;
 	private UserStatus status;
 	private UserType type;
 	
-    private static long id = 0;  // Counter for generating unique user IDs
+    	private static long id = 0;  // Counter for generating unique user IDs
 	
 	// Generate random ID for user
 	public static synchronized String generateID() {
@@ -15,35 +15,35 @@ public class User {
 	}
 	
 	// Constructor for creating a new user
-    public User(String username, String password, UserType type) {
-        this.userID = generateID();   // Generate a unique user ID
-        this.username = username;
-        this.password = password;
-        this.type = type;
-        this.status = UserStatus.OFFLINE; // Initial status for a new user (assumed offline)
-    }
+    	public User(String username, String password, UserType type) {
+        	this.userID = generateID();   // Generate a unique user ID
+        	this.username = username;
+        	this.password = password;
+        	this.type = type;
+        	this.status = UserStatus.OFFLINE; // Initial status for a new user (assumed offline)
+    	}
 	
-    // Getter method for retrieving the user ID
+    	// Getter method for retrieving the user ID
 	public String getUserID() {
 		return userID;
 	}
 	
-    // Getter method for retrieving the username
+   	 // Getter method for retrieving the username
 	public String getUsername() {
 		return username;
 	}
 	
-    // Getter method for retrieving the password
+    	// Getter method for retrieving the password
 	public String getPassword() {
 		return password;
 	}
 	
-    // Getter method for retrieving the user status
+    	// Getter method for retrieving the user status
 	public UserStatus getUserStatus() {
 		return status;
 	}
 
-    // Getter method for retrieving the user type
+    	// Getter method for retrieving the user type
 	public UserType getUserType() {
 		return type;
 	}
