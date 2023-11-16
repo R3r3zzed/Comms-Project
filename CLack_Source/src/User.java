@@ -2,6 +2,7 @@
 
 public class User {
     	private String userID;
+	private String name;
 	private String username;
 	private String password;
 	private UserStatus status;
@@ -15,8 +16,9 @@ public class User {
 	}
 	
 	// Constructor for creating a new user
-    	public User(String username, String password, UserType type) {
+    	public User(String name, String username, String password, UserType type) {
         	this.userID = generateID();   // Generate a unique user ID
+		this.name = name;
         	this.username = username;
         	this.password = password;
         	this.type = type;
@@ -27,8 +29,13 @@ public class User {
 	public String getUserID() {
 		return userID;
 	}
+
+	// Getter method for retrieving the user's name
+	public String getName() {
+		return name;
+	}
 	
-   	 // Getter method for retrieving the username
+   	// Getter method for retrieving the username
 	public String getUsername() {
 		return username;
 	}
