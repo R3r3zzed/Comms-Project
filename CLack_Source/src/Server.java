@@ -1,5 +1,3 @@
-
-
 import java.io.*;
 import java.lang.System.Logger;
 import java.net.*;
@@ -12,10 +10,30 @@ public class Server {
 	private Logger terminalLogger;
 		
   	public static void main(String[] args){
-  		Server s = new Server();
-  		s.loadInUsers();  
-  		
-  		
+		ServerSocket server = null;
+		try {			
+			server = new ServerSocket(1234);
+			server.setReuseAddress(true);
+
+			while (true) {
+				Socket client = server.accept();
+				ServerHandler clientSock = new ServerHandler(client);
+				new Thread(clientSock).start();
+			}
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+		finally {
+			if (server != null) {
+				try {
+					server.close();
+				}
+				catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
     }
 	
 	public User[] getListUsers() {
@@ -73,31 +91,6 @@ public class Server {
 	
 	public void updateChatRoom() {
 		
-	}
-
-	private static class ServerHandler implements Runnable {
-		private final Socket clientSocket;
-		private String ip;
-		private ChatRoom[] currentChatRooms;
-
-		public ServerHandler(Socket socket)
-		{
-			this.clientSocket = socket;
-		}
-
-		public void run()
-		{
-			
-		}
-		public void FirstTimeLogin() {
-			
-		}
-		public void ReceiveNewMsg() {
-			
-		}
-		public void SendNewMsg() {
-			
-		}
 	}
     
 }
