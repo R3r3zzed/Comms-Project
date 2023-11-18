@@ -1,7 +1,8 @@
 import java.io.*;
 import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.net.*;
-
+import java.util.Scanner;
 
 public class Server {
 	private User[] listUsers;
@@ -14,7 +15,6 @@ public class Server {
 		try {			
 			server = new ServerSocket(1234);
 			server.setReuseAddress(true);
-
 			while (true) {
 				Socket client = server.accept();
 				ServerHandler clientSock = new ServerHandler(client);
@@ -35,12 +35,19 @@ public class Server {
 			}
 		}
     }
-	
+  	
+  	public Server() {  		
+		this.terminalLogger = System.getLogger("Server");
+        this.terminalLogger.log(Level.INFO, "Server is starting");	
+  		loadInUsers(); // loads all comapanies Users into the server.Users array
+  		loadInChatRooms(); // loads all Chatrooms for all users into the server.chatrooms array	
+  	}
+  	
 	public User[] getListUsers() {
 		return listUsers;
 	}
 
-	public void setListUsers(User[] listUsers) {
+	private void setListUsers(User[] listUsers) {
 		this.listUsers = listUsers;
 	}
 
@@ -48,7 +55,7 @@ public class Server {
 		return chatrooms;
 	}
 
-	public void setChatrooms(ChatRoom[] chatrooms) {
+	private void setChatrooms(ChatRoom[] chatrooms) {
 		this.chatrooms = chatrooms;
 	}
 
@@ -69,8 +76,47 @@ public class Server {
 	}
 	
 	private void loadInUsers() {
-		//grab users then set them as users
-		setListUsers(null);
+		User[] users;
+		//grab users from file then set them as users
+		try {
+			File fileObj = new File("directory.txt");
+			Scanner counter = new Scanner(fileObj);
+			int totalUsers = 0;
+	        while (counter.hasNextLine()) {                
+	            counter.nextLine();
+	            totalUsers++;
+	        }
+	        counter.close();
+	        
+	        users = new User[totalUsers];
+	        Scanner reader = new Scanner(fileObj);
+	        
+	        int pos = 0;
+	        while (reader.hasNextLine()) {                
+	        	String userInfo = reader.nextLine();
+				String[] userArray = userInfo.split(";;;");
+				UserType currentUserType;
+				if (userArray[3].toLowerCase().matches("it")){
+					currentUserType = UserType.IT;
+				}
+				else{
+					currentUserType = UserType.BASIC;
+				}
+
+				User newUser = new User(userArray[0], userArray[1], userArray[2], currentUserType);
+	        	users[pos] = newUser;
+	        	pos++;
+	        }
+	        reader.close();
+			setListUsers(users);
+		} 
+		catch (Exception e) {
+			System.out.println(e);
+		}
+	}
+	
+	private void loadInChatRooms() {
+		
 	}
 	
 	public User findUser() {
