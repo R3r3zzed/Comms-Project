@@ -14,11 +14,20 @@ class ServerHandler implements Runnable {
 		public ServerHandler(Socket socket){
 			this.clientSocket = socket;
 			this.ip = this.clientSocket.getInetAddress().getHostAddress();
-			//create the in and out to the client 
-			OutputStream outputStream = this.clientSocket.getOutputStream();
-			InputStream inputStream = this.clientSocket.getInputStream();
-			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
-			ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
+			
+				
+				//create the in and out to the client 
+				try {
+					OutputStream outputStream = this.clientSocket.getOutputStream();
+					InputStream inputStream = this.clientSocket.getInputStream();
+					this.objectOutputStream = new ObjectOutputStream(outputStream);
+					this.objectInputStream = new ObjectInputStream(inputStream);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				
+		
+			
 			
 		}		
 		
@@ -42,6 +51,10 @@ class ServerHandler implements Runnable {
 			
 		}
 		public void SendNewMsg() {
+			
+		}
+		
+		public void logOut() {
 			
 		}
 
