@@ -116,7 +116,47 @@ public class Server {
 	}
 	
 	private void loadInChatRooms() {
-		
+		File folder = new File("log");
+		File[] listOfFiles = folder.listFiles();
+		int currentNumberChatrooms = listOfFiles.length;
+
+		ChatRoom[] chatrooms = new ChatRoom[currentNumberChatrooms];
+
+		for (int i = 0; i < listOfFiles.length; i++) {		
+			String chatroomName = listOfFiles[i].getName();
+
+			try {
+				File fileObj = new File(chatroomName);
+				Scanner counter = new Scanner(fileObj);
+
+				int messageCounter = 0;
+				while (counter.hasNextLine()) {                
+					counter.nextLine();
+					messageCounter++;
+				}
+				counter.close();
+				
+				Message[] tmpMessageArray = new Message[messageCounter];
+				Scanner reader = new Scanner(fileObj);
+				int pos = 0;
+				while (reader.hasNextLine()) {                
+					String messageInfo = reader.nextLine();
+					//sentBy;;;dateSent;;;chatroomUID;;;msgStatus;;;content
+					String[] messageArray = messageInfo.split(";;;");
+
+					// Message newUser = new Message(messageArray[0], messageArray[1], messageArray[2], messageArray[3], messageArray[4]);
+					// users[pos] = newUser;
+					pos++;
+				}
+				reader.close();
+				// setListUsers(users);
+			} 
+			catch (Exception e) {
+				System.out.println(e);
+			}
+		}
+
+		setChatrooms(chatrooms);
 	}
 	
 	public User findUser() {
