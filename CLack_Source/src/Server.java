@@ -2,7 +2,10 @@ import java.io.*;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.net.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Scanner;
+import java.util.Date;
 
 public class Server {
 	private User[] listUsers;
@@ -102,7 +105,6 @@ public class Server {
 				else{
 					currentUserType = UserType.BASIC;
 				}
-
 				User newUser = new User(userArray[0], userArray[1], userArray[2], currentUserType);
 	        	users[pos] = newUser;
 	        	pos++;
@@ -119,23 +121,19 @@ public class Server {
 		File folder = new File("log");
 		File[] listOfFiles = folder.listFiles();
 		int currentNumberChatrooms = listOfFiles.length;
-
 		ChatRoom[] chatrooms = new ChatRoom[currentNumberChatrooms];
-
 		for (int i = 0; i < listOfFiles.length; i++) {		
-			String chatroomName = listOfFiles[i].getName();
-
+			String chatroomFilename = listOfFiles[i].getName();
 			try {
-				File fileObj = new File(chatroomName);
-				Scanner counter = new Scanner(fileObj);
-
-				int messageCounter = 0;
+				File fileObj = new File(chatroomFilename);
+				Scanner counter = new Scanner(fileObj); 
+				String[] users = chatroomFilename.replace(".log","").split("-");
+				int messageCounter = 0; //number of messages in this chatroom
 				while (counter.hasNextLine()) {                
 					counter.nextLine();
 					messageCounter++;
 				}
 				counter.close();
-				
 				Message[] tmpMessageArray = new Message[messageCounter];
 				Scanner reader = new Scanner(fileObj);
 				int pos = 0;
@@ -143,12 +141,13 @@ public class Server {
 					String messageInfo = reader.nextLine();
 					//sentBy;;;dateSent;;;chatroomUID;;;msgStatus;;;content
 					String[] messageArray = messageInfo.split(";;;");
-
-					// Message newUser = new Message(messageArray[0], messageArray[1], messageArray[2], messageArray[3], messageArray[4]);
-					// users[pos] = newUser;
+					DateFormat formatter = new SimpleDateFormat("d-MMM-yyyy,HH:mm:ss aaa");
+					Date date = formatter.parse(messageArray[1]);
+					tmpMessageArray[pos] = new Message(messageArray[0], date, messageArray[2], messageArray[3], messageArray[4]);
 					pos++;
 				}
 				reader.close();
+				chatrooms[i] = new ChatRoom(tmpMessageArray[0].getChatroomID(), users, tmpMessageArray, chatroomFilename);
 				// setListUsers(users);
 			} 
 			catch (Exception e) {
