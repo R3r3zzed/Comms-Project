@@ -40,5 +40,8 @@ public class Message implements Serializable {
     public Date getDateSent(){
         return dateSent;
     }
+    public String getChatroomID(){
+        return this.chatroomUID;
+    }
 
 }
