@@ -1,6 +1,8 @@
 import javax.swing.*;
 import java.awt.GridBagLayout;
 import java.awt.LayoutManager;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
 public class MainUI implements GUI {
@@ -17,17 +19,23 @@ public class MainUI implements GUI {
 	private ChatUI chatUI;
 	private LogsUI logsUI;
 	
+	// to be erased, simply for debugging
+	public void tempFunction() {
+		// initializes some of the variables for testing 
+	}
+	
 	@Override
-	public void display() {
-		// TODO Auto-generated method stub
+	public void display(Client client) {
+		/*
+		 * initialize client
+		 * client = new Client;
+		 */
+		
+		createUI();
 
 	}
 	
 	private void createUI() {
-		
-	}
-	
-	private boolean login() {
 		
 	}
 	
