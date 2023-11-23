@@ -1,3 +1,5 @@
+package project;
+
 import java.io.Serializable;
 
 public class User implements Serializable {
@@ -23,6 +25,16 @@ public class User implements Serializable {
 	
 	// Constructor for creating a new user
     public User(String name, String username, String password, UserType type) {
+        this.userID = generateID();   // Generate a unique user ID
+		this.name = name;
+        this.username = username;
+        this.password = password;
+        this.type = type;
+        this.status = UserStatus.OFFLINE; // Initial status for a new user (assumed offline)
+    }
+    
+ // Constructor for creating a new user with specific UID
+    public User(String userID, String name, String username, String password, UserType type) {
         this.userID = generateID();   // Generate a unique user ID
 		this.name = name;
         this.username = username;
