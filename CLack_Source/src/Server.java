@@ -42,8 +42,8 @@ public class Server {
   	public Server() {  		
 		this.terminalLogger = System.getLogger("Server");
         this.terminalLogger.log(Level.INFO, "Server is starting");	
-  		loadInUsers(); // loads all comapanies Users into the server.Users array
-  		loadInChatRooms(); // loads all Chatrooms for all users into the server.chatrooms array	
+  		loadInUsers(); // loads all companies Users into the server.Users array
+  		loadInChatRooms(); // loads all Chat rooms for all users into the server.chatrooms array	
   	}
   	
 	public User[] getListUsers() {
@@ -55,6 +55,12 @@ public class Server {
 	}
 
 	public ChatRoom[] getChatrooms() {
+		return chatrooms;
+	}
+	
+	public ChatRoom[] getUserChatrooms(String username) {
+		//TO DO add a way to get all chatrooms of give user
+	
 		return chatrooms;
 	}
 
@@ -78,7 +84,7 @@ public class Server {
 		this.terminalLogger = terminalLogger;
 	}
 	
-	private void loadInUsers() {
+	public void loadInUsers() {
 		User[] users;
 		//grab users from file then set them as users
 		try {
@@ -117,7 +123,7 @@ public class Server {
 		}
 	}
 	
-	private void loadInChatRooms() {
+	public void loadInChatRooms() {
 		File folder = new File("log");
 		File[] listOfFiles = folder.listFiles();
 		int currentNumberChatrooms = listOfFiles.length;
@@ -128,7 +134,7 @@ public class Server {
 				File fileObj = new File(chatroomFilename);
 				Scanner counter = new Scanner(fileObj); 
 				String[] users = chatroomFilename.replace(".log","").split("-");
-				int messageCounter = 0; //number of messages in this chatroom
+				int messageCounter = 0; //number of messages in this chat room
 				while (counter.hasNextLine()) {                
 					counter.nextLine();
 					messageCounter++;
@@ -149,7 +155,7 @@ public class Server {
 				reader.close();
 				chatrooms[i] = new ChatRoom(tmpMessageArray[0].getChatroomID(), users, tmpMessageArray, chatroomFilename);
 				// setListUsers(users);
-			} 
+				}
 			catch (Exception e) {
 				System.out.println(e);
 			}
@@ -163,19 +169,37 @@ public class Server {
 	}
 	
 	public boolean isITUser(User u) {
-		return false;
+		if (u.getUserType() == UserType.IT) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
+	public boolean UserAuthentication(String user, String pass) {
+		for (int i = 0; i < listUsers.length; i++) {
+			if (user.matches(listUsers[i].getUsername()) && pass.matches(listUsers[i].getPassword())) {
+				return true;
+			}
+		}
+		return false;		
 	}
 
 	private void sendNewMsgUsers() {
 		
 	}
 	
-	private void createHandler() {
+	public void updateChatRoom() {
 		
 	}
 	
-	public void updateChatRoom() {
-		
+	public void updateUserStatus(String user) {
+		for (int i = 0; i < listUsers.length; i++) {
+			if (user.matches(listUsers[i].getUsername())) {
+				listUsers[i].changeStatus(UserStatus.ONLINE);
+			}
+		}
 	}
     
 }
