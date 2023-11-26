@@ -62,7 +62,7 @@ public class LoginUI implements GUI {
 				password = passwordInput.getText();
 				System.out.println("username: " + username + "\npassword: " + password);
 				
-				// isLoggedIn = client.login(username, password);							/* ADD THIS METHOD IN Client class*/
+				isLoggedIn = client.login(username, password);							/* ADD THIS METHOD IN Client class*/
 				
 				if(isLoggedIn) {
 					JOptionPane.showMessageDialog(frame, "Successfully logged in. Opening...");
@@ -108,6 +108,7 @@ public class LoginUI implements GUI {
 	}
 	
 	public void close() {
+		frame.setVisible(false);
 		frame.dispose();
 	}
 }
