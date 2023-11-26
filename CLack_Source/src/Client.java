@@ -3,7 +3,8 @@ public class Client {
 	public static void main(String args[]) {
 		
 		/* 
-		 * Opens the login screen. For testing
+		 * For testing
+		 * Opens the login screen.
 		 */
 		Client client = new Client();
 		
@@ -12,15 +13,16 @@ public class Client {
 		
 		while(loginScreen.isLoggedIn() == false) {
 			// don't open anything else while not logged in
+			System.out.println(loginScreen.isLoggedIn());
 		}
 		
 		//
 		// Setup client information; Server <-> Client interactions
 		//
-		
+	
 		MainUI mainUI = new MainUI();
 		mainUI.display(client);
-		loginScreen.close();
+		
 		/*
 		 * For testing
 		 */

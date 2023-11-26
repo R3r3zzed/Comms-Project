@@ -50,6 +50,7 @@ public class LoginUI implements GUI {
 		frame.getContentPane().add(panel);
 		frame.setSize(480, 360);
 		frame.setLocale(null);
+		System.out.println("Setting visible");
 		frame.setVisible(true);
 	}
 	
@@ -65,10 +66,12 @@ public class LoginUI implements GUI {
 				isLoggedIn = client.login(username, password);							/* ADD THIS METHOD IN Client class*/
 				
 				if(isLoggedIn) {
-					JOptionPane.showMessageDialog(frame, "Successfully logged in. Opening...");
+					JOptionPane.showMessageDialog(null, "Successfully logged in. Opening...");
+					frame.setVisible(false);
+					frame.dispose();
 				}
 				else {
-					JOptionPane.showMessageDialog(frame, "Login Failed: Incorrect username or password");
+					JOptionPane.showMessageDialog(null, "Login Failed: Incorrect username or password");
 				}
 			}
 		});
@@ -105,10 +108,5 @@ public class LoginUI implements GUI {
 	
 	public boolean isLoggedIn() {
 		return isLoggedIn;
-	}
-	
-	public void close() {
-		frame.setVisible(false);
-		frame.dispose();
 	}
 }
