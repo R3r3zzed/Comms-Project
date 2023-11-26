@@ -39,8 +39,43 @@ public class LoginUI implements GUI {
 		createUI();
 	}
 	
+	// handles creation of the frame to be displayed.
+	// functionality and placement of other components is delegated to other methods
 	private void createUI() {
+		
+		placeComponents();
 		login();
+		
+		frame.getRootPane().setDefaultButton(submitButton);
+		frame.getContentPane().add(panel);
+		frame.setSize(480, 360);
+		frame.setLocale(null);
+		frame.setVisible(true);
+	}
+	
+	// opens a login frame that prompts the user for their username and password
+	// provides functionality to button presses.
+	private void login() {
+		submitButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				username = usernameInput.getText();
+				password = passwordInput.getText();
+				System.out.println("username: " + username + "\npassword: " + password);
+				
+				// isLoggedIn = client.login(username, password);							/* ADD THIS METHOD IN Client class*/
+				
+				if(isLoggedIn) {
+					JOptionPane.showMessageDialog(frame, "Successfully logged in. Opening...");
+				}
+				else {
+					JOptionPane.showMessageDialog(frame, "Login Failed: Incorrect username or password");
+				}
+			}
+		});
+	}
+	
+	// handles setting up how buttons will placed on panel
+	private void placeComponents() {
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.gridy = 0;
 		constraints.gridx = 0;
@@ -64,32 +99,6 @@ public class LoginUI implements GUI {
 		constraints.gridy = 2;
 		constraints.gridwidth = 2;
 		panel.add(submitButton, constraints);
-		
-		frame.getRootPane().setDefaultButton(submitButton);
-		frame.getContentPane().add(panel);
-		frame.setSize(480, 360);
-		frame.setLocale(null);
-		frame.setVisible(true);
-	}
-	
-	// opens a login frame that prompts the user for their username and password
-	private void login() {
-		submitButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				username = usernameInput.getText();
-				password = passwordInput.getText();
-				System.out.println("username: " + username + "\npassword: " + password);
-				
-				// isLoggedIn = client.login(username, password);							/* ADD THIS METHOD IN Client class*/
-				
-				if(isLoggedIn) {
-					JOptionPane.showMessageDialog(frame, "Successfully logged in. Opening...");
-				}
-				else {
-					JOptionPane.showMessageDialog(frame, "Login Failed: Incorrect username or password");
-				}
-			}
-		});
 	}
 	
 	/************************************** For Main Driver **************************************/
