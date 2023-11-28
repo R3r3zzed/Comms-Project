@@ -5,12 +5,14 @@ import java.net.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Scanner;
+import java.util.Vector;
+import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 
 public class Server {
-	private User[] listUsers;
-	private ChatRoom[] chatrooms;
-	private Thread[] threads[];
+	private Vector<User> listUsers;
+	private Vector<ChatRoom> chatrooms;
 	private Logger terminalLogger;
 		
   	public static void main(String[] args){
@@ -42,65 +44,31 @@ public class Server {
   	public Server() {  		
 		this.terminalLogger = System.getLogger("Server");
         this.terminalLogger.log(Level.INFO, "Server is starting");	
-  		loadInUsers(); // loads all companies Users into the server.Users array
-  		loadInChatRooms(); // loads all Chat rooms for all users into the server.chatrooms array	
+  		loadInUsers("/Users/orion/Desktop/School/Fall_2023/Software_engineering/Comms-Project/CLack_Source/src/directory.txt"); // loads all companies Users into the server.Users array
+//  		loadInChatRooms("/Users/orion/Desktop/School/Fall_2023/Software_engineering/Comms-Project/CLack_Source/src/logs"); // loads all Chat rooms for all users into the server.chatrooms array	
   	}
-  	
-	public User[] getListUsers() {
-		return listUsers;
+  	public Server(String testDirectory, String testLogDirectory) { 		
+  		this.terminalLogger = System.getLogger("Test Server");
+  		this.terminalLogger.log(Level.INFO, "Test Server is starting");	
+		loadInUsers(testDirectory); // loads all companies Users into the server.Users array
+		loadInChatRooms(testLogDirectory); // loads all Chat rooms for all users into the server.chatrooms array	
 	}
-
-	private void setListUsers(User[] listUsers) {
+  	
+	private void setListUsers(Vector<User> listUsers) {
 		this.listUsers = listUsers;
 	}
 
-	public ChatRoom[] getChatrooms() {
-		return chatrooms;
-	}
-	
-	public ChatRoom[] getUserChatrooms(String username) {
-		//TO DO add a way to get all chatrooms of give user
-	
-		return chatrooms;
+	public Vector<User> getListUsers() {
+		return listUsers;
 	}
 
-	private void setChatrooms(ChatRoom[] chatrooms) {
-		this.chatrooms = chatrooms;
-	}
-
-	public Thread[][] getThreads() {
-		return threads;
-	}
-
-	public void setThreads(Thread[] threads[]) {
-		this.threads = threads;
-	}
-
-	public Logger getTerminalLogger() {
-		return terminalLogger;
-	}
-
-	public void setTerminalLogger(Logger terminalLogger) {
-		this.terminalLogger = terminalLogger;
-	}
-	
-	public void loadInUsers() {
-		User[] users;
+	public void loadInUsers(String directoryFileName) {
+		Vector<User> users = new Vector<User>();
 		//grab users from file then set them as users
 		try {
-			File fileObj = new File("directory.txt");
-			Scanner counter = new Scanner(fileObj);
-			int totalUsers = 0;
-	        while (counter.hasNextLine()) {                
-	            counter.nextLine();
-	            totalUsers++;
-	        }
-	        counter.close();
-	        
-	        users = new User[totalUsers];
+			File fileObj = new File(directoryFileName);
 	        Scanner reader = new Scanner(fileObj);
 	        
-	        int pos = 0;
 	        while (reader.hasNextLine()) {                
 	        	String userInfo = reader.nextLine();
 				String[] userArray = userInfo.split(";;;");
@@ -112,8 +80,7 @@ public class Server {
 					currentUserType = UserType.BASIC;
 				}
 				User newUser = new User(userArray[0], userArray[1], userArray[2], currentUserType);
-	        	users[pos] = newUser;
-	        	pos++;
+	        	users.add(newUser);
 	        }
 	        reader.close();
 			setListUsers(users);
@@ -122,50 +89,69 @@ public class Server {
 			System.out.println(e);
 		}
 	}
+
+	private void setChatrooms(Vector<ChatRoom> chatrooms) {
+		this.chatrooms = chatrooms;
+	}
+
+	public Vector<ChatRoom> getChatrooms() {
+		return chatrooms;
+	}
 	
-	public void loadInChatRooms() {
-		File folder = new File("log");
+	public Vector<ChatRoom> getUserChatrooms(String username) {
+		Vector<ChatRoom> userChatroom = new Vector<ChatRoom>();
+	    Iterator<ChatRoom> iterate = chatrooms.iterator();
+        while(iterate.hasNext()) {
+			ChatRoom current = iterate.next();
+			Iterator<String> userIterate = current.getUsers().iterator();
+			while(userIterate.hasNext()) {
+				String currentUser = userIterate.next();
+				if (username.matches(currentUser)) {
+					userChatroom.add(current);
+					break;
+				}
+			}
+		}
+		return userChatroom;
+	}
+
+	public void loadInChatRooms(String logDirectory) {
+		File folder = new File(logDirectory);
 		File[] listOfFiles = folder.listFiles();
-		int currentNumberChatrooms = listOfFiles.length;
-		ChatRoom[] chatrooms = new ChatRoom[currentNumberChatrooms];
+		Vector<ChatRoom> chatrooms = new Vector<ChatRoom>();
+		if (listOfFiles == null) {
+			// add logging to show that logs were empty
+			return;
+		}
+		
 		for (int i = 0; i < listOfFiles.length; i++) {		
 			String chatroomFilename = listOfFiles[i].getName();
 			try {
 				File fileObj = new File(chatroomFilename);
-				Scanner counter = new Scanner(fileObj); 
+
 				String[] users = chatroomFilename.replace(".log","").split("-");
-				int messageCounter = 0; //number of messages in this chat room
-				while (counter.hasNextLine()) {                
-					counter.nextLine();
-					messageCounter++;
-				}
-				counter.close();
-				Message[] tmpMessageArray = new Message[messageCounter];
+				Vector<String> vectorUsers = new Vector<String>(); 
+				Collections.addAll(vectorUsers, users);
+				Vector<Message> tmpMessageVec= new Vector<Message>();
 				Scanner reader = new Scanner(fileObj);
-				int pos = 0;
+				String chatroomID = null;
 				while (reader.hasNextLine()) {                
 					String messageInfo = reader.nextLine();
-					//sentBy;;;dateSent;;;chatroomUID;;;msgStatus;;;content
+					//sentBy;;;dateSent;;;chatroomUID;;;msgStatus;;;msgType;;;content
 					String[] messageArray = messageInfo.split(";;;");
 					DateFormat formatter = new SimpleDateFormat("d-MMM-yyyy,HH:mm:ss aaa");
 					Date date = formatter.parse(messageArray[1]);
-					tmpMessageArray[pos] = new Message(messageArray[0], date, messageArray[2], messageArray[3], messageArray[4]);
-					pos++;
+					chatroomID = messageArray[2];
+					tmpMessageVec.add(new Message(messageArray[0], date, messageArray[2], messageArray[3], msgType.TEXT, messageArray[5]));
 				}
 				reader.close();
-				chatrooms[i] = new ChatRoom(tmpMessageArray[0].getChatroomID(), users, tmpMessageArray, chatroomFilename);
-				// setListUsers(users);
-				}
-			catch (Exception e) {
+				chatrooms.add(new ChatRoom(chatroomID, vectorUsers, tmpMessageVec, chatroomFilename));
+
+			} catch (Exception e) {
 				System.out.println(e);
 			}
 		}
-
 		setChatrooms(chatrooms);
-	}
-	
-	public User findUser() {
-		return null;
 	}
 	
 	public boolean isITUser(User u) {
@@ -178,26 +164,79 @@ public class Server {
 	}
 	
 	public boolean UserAuthentication(String user, String pass) {
-		for (int i = 0; i < listUsers.length; i++) {
-			if (user.matches(listUsers[i].getUsername()) && pass.matches(listUsers[i].getPassword())) {
+        Iterator<User> iterate = listUsers.iterator(); //first user
+        while(iterate.hasNext()) {
+			User current = iterate.next();
+            if (user.matches(current.getUsername()) && pass.matches(current.getPassword())) {
 				return true;
 			}
-		}
-		return false;		
+        }
+		return false;	
 	}
 
-	private void sendNewMsgUsers() {
-		
+	public void setTerminalLogger(Logger terminalLogger) {
+		this.terminalLogger = terminalLogger;
 	}
 	
-	public void updateChatRoom() {
-		
+	public Logger getTerminalLogger() {
+		return terminalLogger;
+	}
+
+	public void updateNewMessage(Message m){
+		//figure out which chatroom this message belongs to
+		String chatroomID = m.getChatroomID();
+		Iterator<ChatRoom> iterate = chatrooms.iterator();
+		ChatRoom foundChatroom = null;
+        while(iterate.hasNext()) {
+			ChatRoom current = iterate.next();
+            if (chatroomID.matches(current.getChatID() )) {
+				foundChatroom = current;
+			}
+        }
+		//update it
+		Vector<String> Users = null;
+		if (foundChatroom != null){
+			int index = chatrooms.indexOf(foundChatroom);
+			ChatRoom c = chatrooms.get(index);
+			c.addMessage(m);
+			chatrooms.set(index, c);
+			Users = c.getUsers();
+		}
+		//figure out which users are online
+		Iterator<User> iterateUsers = listUsers.iterator();
+
+        while(iterateUsers.hasNext()) {
+			User current = iterateUsers.next();
+			String username = current.getUsername();
+			int indexUser = Users.indexOf(username);
+            if ( indexUser != -1 ) { // if one of the users in the chatroom
+				if (current.getUserStatus() == UserStatus.ONLINE){ // and if online
+					//send each the message
+					
+				}
+			}
+        }
 	}
 	
 	public void updateUserStatus(String user) {
-		for (int i = 0; i < listUsers.length; i++) {
-			if (user.matches(listUsers[i].getUsername())) {
-				listUsers[i].changeStatus(UserStatus.ONLINE);
+        Iterator<User> iterate = listUsers.iterator();
+		User foundUser = null;
+        while(iterate.hasNext()) {
+			User current = iterate.next();
+            if (user.matches(current.getUsername())) {
+				foundUser = current;
+			}
+        }
+		if (foundUser != null){
+			int index = listUsers.indexOf(foundUser);
+
+			if (foundUser.getUserStatus() == UserStatus.OFFLINE){
+				foundUser.changeStatus(UserStatus.ONLINE);
+				listUsers.set(index, foundUser);
+			}
+			else if (foundUser.getUserStatus() == UserStatus.ONLINE){
+				foundUser.changeStatus(UserStatus.OFFLINE);
+				listUsers.set(index, foundUser);
 			}
 		}
 	}
