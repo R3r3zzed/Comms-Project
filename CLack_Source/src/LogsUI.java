@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 
 public class LogsUI implements GUI {
+	private Client client;
 	private JFrame frame;
 	private JScrollPane directoryScrollPane;
 	private ArrayList<JButton> selectUserButtons;
@@ -14,6 +15,10 @@ public class LogsUI implements GUI {
 	private User selectedUser;
 	private JLabel userLabel;
 	private ChatUI chatUI;
+	
+	public LogsUI(Client client) {
+		this.client = client;
+	}
 	
 	@Override
 	public void display() {

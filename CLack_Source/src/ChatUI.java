@@ -4,6 +4,7 @@ import java.awt.LayoutManager;
 import java.util.ArrayList;
 
 public class ChatUI implements GUI {
+	private Client client;
 	private JFrame frame;
 	private ArrayList<User> participants;
 	private ArrayList<User> messages;
@@ -14,7 +15,10 @@ public class ChatUI implements GUI {
 	private JTextField messageTextField;
 	private JButton sendMessageButton;
 	
-	@Override
+	public ChatUI(Client client) {
+		this.client = client;
+	}
+	
 	public void display() {
 		// TODO Auto-generated method stub
 

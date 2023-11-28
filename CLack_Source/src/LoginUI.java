@@ -11,7 +11,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 public class LoginUI implements GUI {
-	Client client;
+	ClientFake client;
 	private JFrame frame;
 	private JPanel panel;
 	private String username;
@@ -24,7 +24,10 @@ public class LoginUI implements GUI {
 	private Boolean isLoggedIn = false;
 	int textFieldCharLimit = 20;
 	
-	@Override
+	public LoginUI(ClientFake client) {
+		this.client = client;
+	}
+	
 	public void display() {
 		frame = new JFrame("login screen");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -34,7 +37,6 @@ public class LoginUI implements GUI {
 		usernameInput = new JTextField(textFieldCharLimit);
 		passwordInput = new JTextField(textFieldCharLimit);
 		submitButton = new JButton("Submit");
-		this.client = client;
 		
 		createUI();
 	}
