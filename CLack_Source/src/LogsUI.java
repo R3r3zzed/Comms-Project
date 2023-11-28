@@ -16,7 +16,7 @@ public class LogsUI implements GUI {
 	private ChatUI chatUI;
 	
 	@Override
-	public void display(Client client) {
+	public void display() {
 		// TODO Auto-generated method stub
 		
 	}

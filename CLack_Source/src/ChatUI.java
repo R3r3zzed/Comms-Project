@@ -15,7 +15,7 @@ public class ChatUI implements GUI {
 	private JButton sendMessageButton;
 	
 	@Override
-	public void display(Client client) {
+	public void display() {
 		// TODO Auto-generated method stub
 
 	}

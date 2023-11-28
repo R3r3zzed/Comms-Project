@@ -35,7 +35,7 @@ public class MainUI implements GUI{
 	private LogsUI logsUI;
 	
 	@Override
-	public void display(Client client) {
+	public void display() {
 		this.client = client;
 		// currentUser = client.getCurrentUser;		// needs to be implemented in Client class
 		frame = new JFrame("CLack");
@@ -58,6 +58,7 @@ public class MainUI implements GUI{
 	}
 	
 	// handles setting up how buttons will placed on panel
+	// does not handle functionality
 	private void placeComponents() {
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.gridy = 0;

@@ -1,3 +1,3 @@
 public interface GUI {
-	public void display(Client client);
+	public void display();
 }

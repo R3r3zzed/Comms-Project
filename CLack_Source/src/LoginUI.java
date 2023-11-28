@@ -25,7 +25,7 @@ public class LoginUI implements GUI {
 	int textFieldCharLimit = 20;
 	
 	@Override
-	public void display(Client client) {
+	public void display() {
 		frame = new JFrame("login screen");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		panel = new JPanel(new GridBagLayout());
