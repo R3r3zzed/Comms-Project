@@ -35,7 +35,7 @@ public class User implements Serializable {
     
  // Constructor for creating a new user with specific UID
     public User(String userID, String name, String username, String password, UserType type) {
-        this.userID = generateID();   // Generate a unique user ID
+        this.userID = userID; 
 		this.name = name;
         this.username = username;
         this.password = password;
