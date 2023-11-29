@@ -69,6 +69,8 @@ public class LoginUI implements GUI {
 				
 				if(isLoggedIn) {
 					JOptionPane.showMessageDialog(null, "Successfully logged in. Opening...");
+					MainUI mainUI = new MainUI(client);
+					mainUI.display();
 					frame.setVisible(false);
 					frame.dispose();
 				}
@@ -104,11 +106,5 @@ public class LoginUI implements GUI {
 		constraints.gridy = 2;
 		constraints.gridwidth = 2;
 		panel.add(submitButton, constraints);
-	}
-	
-	/************************************** For Main Driver **************************************/
-	
-	public boolean isLoggedIn() {
-		return isLoggedIn;
 	}
 }
