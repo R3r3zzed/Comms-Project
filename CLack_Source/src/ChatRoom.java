@@ -45,4 +45,7 @@ public class ChatRoom {
 	public Vector<String>  getUsers() {
 		return participantHandlers;
 	}
+	public String getHistoryFile(){
+		return this.history.getChatHistoryFile();
+	}
 }
