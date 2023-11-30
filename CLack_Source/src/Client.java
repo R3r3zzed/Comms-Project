@@ -1,8 +1,11 @@
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Vector;
+import java.util.*;
+import java.io.*;
 
 public class Client {
     private Socket socket;
@@ -11,7 +14,6 @@ public class Client {
     private String serverIP;
     private int serverPort;
     
-    // -
     private User currentUser;
     private Vector<User> directory;
     private Vector<ChatRoom> rooms;
@@ -21,9 +23,9 @@ public class Client {
         this.serverPort = serverPort;
         this.directory = new Vector<>();
         this.rooms = new Vector<>();
+        connect();
     }
     
-    // +
     // Establishes connection with the server
     public boolean connect() {
         try {
@@ -95,9 +97,14 @@ public class Client {
         this.directory = updatedDirectory;
     }
     
+    // getting the chatroom from server
+    public void updateChatRoom() {
+    	
+    }
+    
     public void addRoom(ChatRoom room) {
     	if(room == null)
-        this.rooms.add(room);
+    		this.rooms.add(room);
     }
     
     public User getCurrentUser() {
@@ -123,17 +130,17 @@ public class Client {
     }
 
     public static void main(String[] args) {
-        Client client = new Client("127.0.0.1", 1234);
+        Client client = new Client("134.154.20.147", 1234);
+        client.connect();
 
-        LoginUI loginScreen = new LoginUI();
-        loginScreen.display(client);
-
-        while (!loginScreen.isLoggedIn()){/* Wait for successful login */}
-        
-        do {
-        	MainUI mainUI = new MainUI();
-        	mainUI.display(client);
-        }while(loginScreen.isLoggedIn());
-        
+//        LoginUI loginScreen = new LoginUI();
+//        loginScreen.display(client);
+//
+//        while (!loginScreen.isLoggedIn()){/* Wait for successful login */}
+//        
+//        do {
+//        	MainUI mainUI = new MainUI();
+//        	mainUI.display(client);
+//        }while(loginScreen.isLoggedIn());
     }
 }
