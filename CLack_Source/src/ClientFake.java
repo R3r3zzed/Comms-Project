@@ -33,7 +33,9 @@ public class ClientFake{
 		public boolean login(String username, String password) {
 			String user = "admin";
 			String pass = "admin";
-			if (username.compareTo(user) == 0 && username.compareTo(pass) == 0) {
+			if (username.compareTo(user) == 0 && password.compareTo(pass) == 0) {
+				System.out.println(username.compareTo(user) == 0);
+				System.out.println(password.compareTo(pass) == 0);
 				System.out.println("SUCCESS: logged in");
 				return true;
 			}
