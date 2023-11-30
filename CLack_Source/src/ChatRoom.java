@@ -1,24 +1,22 @@
-import java.util.List;
-import java.util.Vector;
-import java.util.ArrayList;
+package Implementation;
 
-import java.util.stream.Collectors;
+import java.util.Vector;
 
 
 public class ChatRoom {
 	private String chatID;
 	private ChatHistory history;
 	private Vector<Message> roomMessages;
-	private Vector<String> participantHandlers;
+	private Vector<User> participantHandlers;
 	
-	public ChatRoom(String chatID, Vector<String> users, String filename){
+	public ChatRoom(String chatID, Vector<User> users, String filename){
 		this.chatID = chatID;
 		this.history = new ChatHistory(filename);
 		this.roomMessages = new Vector<Message>();
 		this.participantHandlers = users;
 
 	}
-	public ChatRoom(String chatID, Vector<String> users, Vector<Message>  newMessages, String filename){
+	public ChatRoom(String chatID, Vector<User> users, Vector<Message>  newMessages, String filename){
 		this.chatID = chatID;
 		this.history = new ChatHistory(filename);
 		this.roomMessages = newMessages;
@@ -42,10 +40,8 @@ public class ChatRoom {
 		return this.roomMessages;
 	}
 	
-	public Vector<String>  getUsers() {
+	public Vector<User>  getUsers() {
 		return participantHandlers;
 	}
-	public String getHistoryFile(){
-		return this.history.getChatHistoryFile();
-	}
 }
+
