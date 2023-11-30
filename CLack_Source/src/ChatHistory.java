@@ -28,6 +28,7 @@ public class ChatHistory {
         this.chatRoomFilename = newFile;
     }
 
-
-    
+    public String getChatHistoryFile(){
+        return this.chatRoomFilename;
+    }
 }
