@@ -7,8 +7,9 @@ public class Message implements Serializable {
 	private String chatroomUID; //the chatroom ID
 	private msgStatus currentMsgStatus;
 	private String content;
+    private msgType type;
     
-    public Message(String username, Date originalDate, String chatroomID, String status ,String text){
+    public Message(String username, Date originalDate, String chatroomID, String status, msgType type, String text){
         this.sentBy = username;
         this.dateSent = originalDate;
         this.chatroomUID = chatroomID;
@@ -19,11 +20,14 @@ public class Message implements Serializable {
             currentMsgStatus = msgStatus.RECEIVED;
         }
         this.content = text;
+        this.type = type;
+
     }
 
     public String getContent(){
         return content;
     }
+
 
     public String getSendBy(){
         return sentBy;
@@ -35,6 +39,10 @@ public class Message implements Serializable {
 
     public void changeMsgStatus(){
         currentMsgStatus = msgStatus.RECEIVED;
+    }
+
+    public msgType getType(){
+        return type;
     }
 
     public Date getDateSent(){
