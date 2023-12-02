@@ -48,7 +48,7 @@ public class ChatHistory {
 					String status = parts[3];
 					String content = parts[4];
 
-					Message message = new Message(sentBy, dateSent, chatroomID, status, content);
+					Message message = new Message(sentBy, dateSent, chatroomID, status, msgType.TEXT, content);
 					messageVector.add(message);
 				}
 			}
