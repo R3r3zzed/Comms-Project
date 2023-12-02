@@ -97,10 +97,18 @@ public class Client {
         this.directory = updatedDirectory;
     }
     
-    // getting the chatroom from server
-    public void updateChatRoom() {
-    	
+    public void updateChatRoom(ChatRoom room) {
+        // Assuming room has a unique identifier that we can use to find and replace it in the local list
+        for (int i = 0; i < this.rooms.size(); i++) {
+            if (this.rooms.get(i).getChatID().equals(room.getChatID())) {
+                this.rooms.set(i, room);
+                return;
+            }
+        }
+        // If the room is new, add it to the list
+        this.rooms.add(room);
     }
+
     
     public void addRoom(ChatRoom room) {
     	if(room == null)
@@ -110,7 +118,7 @@ public class Client {
     public User getCurrentUser() {
         return currentUser;
     }
-
+    
     public Vector<User> getDirectory() {
         return directory;
     }
@@ -118,7 +126,7 @@ public class Client {
     public Vector<ChatRoom> getRooms() {
         return rooms;
     }
-
+    
     // Close the connection
     public void close() {
         try {
@@ -132,15 +140,15 @@ public class Client {
     public static void main(String[] args) {
         Client client = new Client("134.154.20.147", 1234);
         client.connect();
+        
+        LoginUI loginScreen = new LoginUI();
+        loginScreen.display(client);
 
-//        LoginUI loginScreen = new LoginUI();
-//        loginScreen.display(client);
-//
-//        while (!loginScreen.isLoggedIn()){/* Wait for successful login */}
-//        
-//        do {
-//        	MainUI mainUI = new MainUI();
-//        	mainUI.display(client);
-//        }while(loginScreen.isLoggedIn());
+        while (!loginScreen.isLoggedIn()){/* Wait for successful login */}
+        
+        do {
+        	MainUI mainUI = new MainUI();
+        	mainUI.display(client);
+        }while(loginScreen.isLoggedIn());
     }
 }
