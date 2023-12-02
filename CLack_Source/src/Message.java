@@ -24,6 +24,10 @@ public class Message implements Serializable {
 
     }
 
+    public String toString() {
+        return String.format("Sent by %s: %s", getSendBy(), getContent());
+    }
+
     public String getContent(){
         return content;
     }
