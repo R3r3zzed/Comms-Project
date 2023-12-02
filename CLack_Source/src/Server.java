@@ -9,13 +9,12 @@ import java.util.Vector;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.Queue;
 import java.util.concurrent.*; 
 
 public class Server {
 	private Vector<User> listUsers;
 	private Vector<ChatRoom> chatrooms;
-	private ConcurrentHashMap<String, Queue<Message>> newMsg;
+	private ConcurrentHashMap<String, ConcurrentLinkedQueue<Message>> newMsg;
 	private Logger terminalLogger;
 		
   	public static void main(String[] args){
@@ -48,10 +47,11 @@ public class Server {
 		}
     }
   	
-  	public Server() {  		
-  		loadInUsers("directory.txt"); // loads all companies Users into the server.Users array
- 		loadInChatRooms("logs"); // loads all Chat rooms for all users into the server.chatrooms array	
-		newMsg = new ConcurrentHashMap<String, Queue<Message>>();
+  	public Server() {  	
+		
+		loadInUsers("directory.txt"); // loads all companies Users into the server.Users array
+		loadInChatRooms("logs"); // loads all Chat rooms for all users into the server.chatrooms array
+		newMsg = new ConcurrentHashMap<String, ConcurrentLinkedQueue<Message>>();
   	}
   	public Server(String testDirectory, String testLogDirectory) { 		
 		loadInUsers(testDirectory); // loads all companies Users into the server.Users array
@@ -205,7 +205,7 @@ public class Server {
 		return terminalLogger;
 	}
 
-	public void updateNewMessage(Message m){
+	public void updateNewMessage(String sender, Message m){
 		//figure out which chatroom this message belongs to
 		String chatroomID = m.getChatroomID();
 		Iterator<ChatRoom> iterate = chatrooms.iterator();
@@ -228,10 +228,11 @@ public class Server {
 		//figure out which users are online
 		Iterator<User> iterateChatroomUsers = chatroomUsers.iterator();
         while(iterateChatroomUsers.hasNext()) {
-
 			User currentChatroom = iterateChatroomUsers.next();
 			String usernameChatroom = currentChatroom.getUsername();
-
+			if (sender.matches(usernameChatroom)){
+				continue;
+			}
 			//Get the Server version of the user
 			Iterator<User> iterateServerUsers = listUsers.iterator();
 			while(iterateServerUsers.hasNext()) {
@@ -271,8 +272,13 @@ public class Server {
 		}
 	}
 	
+	public void setUpUserQ(String User){
+		ConcurrentLinkedQueue<Message> newQ = new ConcurrentLinkedQueue<Message>();
+		newMsg.put(User, newQ);
+	}
+
 	public void addToNewMessageQ(String User, Message m) {
-		Queue<Message> newMessages = newMsg.get(User);
+		ConcurrentLinkedQueue<Message> newMessages = newMsg.get(User);
 		newMsg.remove(User, newMessages);
 		newMessages.add(m);
 		newMsg.put(User, newMessages);
@@ -281,7 +287,7 @@ public class Server {
 	public Vector<Message> grabFromNewMessageQ(String User) {
 		//gets the messages from the queue
 		Vector<Message> vectorMessage= new Vector<Message>();
-		Queue<Message> newMessages = newMsg.get(User);
+		ConcurrentLinkedQueue<Message> newMessages = newMsg.get(User);
 		try{
 			if (newMessages.isEmpty()){
 				return null;
@@ -299,14 +305,8 @@ public class Server {
 	}
 	
 	public void revoveUserFromQ(String User) {
-		try{
-			Queue<Message> newMessages = newMsg.get(User);
-			newMsg.remove(User, newMessages);
-		}
-		catch (java.lang.NullPointerException e) {
-
-		}
-
+		ConcurrentLinkedQueue<Message> newMessages = newMsg.get(User);
+		newMsg.remove(User, newMessages);
 	}
     
 
@@ -342,7 +342,7 @@ public class Server {
 				DataOutputStream dataOutputStream = new DataOutputStream(new BufferedOutputStream(outputStream));
 
 				// //Who is logging on
-				boolean ValidUser = false;
+				Boolean ValidUser = false;
 				while(! ValidUser){
 					String UserAndPassword = (String) objectInputStream.readObject();
 					String[] userInfo = UserAndPassword.split(";;;");
@@ -355,17 +355,26 @@ public class Server {
 						//add log to server to show which user is online
 						// return a true boolean to tell the user is online
 						objectOutputStream.writeBoolean(ValidUser);
+						objectOutputStream.flush();
 						ServerInfo.updateUserStatus(userInfo[0]);
+						// Thread.sleep(40);
+						objectOutputStream.writeObject(this.currentUser);
+						objectOutputStream.flush();
 
 						System.out.println(this.currentUser.getUsername() + " is online");
 					}
 					else {
 						// return a false boolean to tell the user is not valid
 						objectOutputStream.writeBoolean(ValidUser);
+						objectOutputStream.flush();
+						System.out.println("Error with confirmation, try again...");
 					}
 				}
 				// Send over all messages to client, and updated server on the online status of the user
-				FirstTimeLogin();
+				// FirstTimeLogin();
+
+				ServerInfo.setUpUserQ(this.currentUser.getUsername());
+
 
 				// Both method for getting new messages and sending new messages get its own thread
 				// Getting messages from server is constant in another thread but getting messages from client this main thread (need to know when to log out)
@@ -387,16 +396,18 @@ public class Server {
 					}
 					System.out.println(newMessage.toString());
 					//update server and other users of new message - it will send to all users including the user it was sent from
-					ServerInfo.updateNewMessage(newMessage);
+					ServerInfo.updateNewMessage(this.currentUser.getUsername() ,newMessage);
 				}
 			} catch (SocketException e){
 				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
-			} 
-			catch (ClassNotFoundException e) {
+			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
-			}
+			} 
+			// catch (InterruptedException e) {
+			// 	e.printStackTrace();
+			// }
 
 		}
 		
@@ -457,34 +468,47 @@ public class Server {
 		private ObjectOutputStream outTunnel;
 		private User user;
 		private Server serverInfo;
+		private Boolean runner;
 		
 		public receiveNewMessageClass(User u, Server s, ObjectOutputStream outObject) {
 			this.outTunnel = outObject;
 			this.user = u;
 			this.serverInfo = s;
+			this.runner = true;
+		}
+
+		public void finish() {
+			this.runner = false;
 		}
 		
 		public void run(){
-			//check to see if there are new messages for User
-			Vector<Message> newMessages = this.serverInfo.grabFromNewMessageQ(this.user.getUsername());
-			if (newMessages != null){
-				//Send all messages in the queue to the the client
-				Iterator<Message> iterate = newMessages.iterator();
-				while(iterate.hasNext()) {
-					Message currentMessage = iterate.next();
-					try {
-						this.outTunnel.writeObject(currentMessage);
-					} catch (IOException e) {
-						e.printStackTrace();
+			while(this.runner){
+				//check to see if there are new messages for User
+				Vector<Message> newMessages = this.serverInfo.grabFromNewMessageQ(this.user.getUsername());
+				if (newMessages != null){
+					//Send all messages in the queue to the the client
+					System.out.println(String.format("%s has %d new messages",this.user.getUsername(), newMessages.size()));
+					Iterator<Message> iterate = newMessages.iterator();
+					while(iterate.hasNext()) {
+						Message currentMessage = iterate.next();
+						try {
+							this.outTunnel.writeObject(currentMessage);
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
 					}
 				}
+				else{
+					System.out.println(String.format("%s has no new messages", this.user.getUsername()));
+				}
+				
+				try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e) {
+					System.exit(0);
+					return;
+				}
 			}
-			
-			try {
-				Thread.sleep(4000);
-			} catch (InterruptedException e) {
-			}
-			
 		}
 	}
 
