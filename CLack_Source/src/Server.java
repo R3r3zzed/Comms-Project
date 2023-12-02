@@ -66,6 +66,14 @@ public class Server {
 		return listUsers;
 	}
 
+	private void setChatrooms(Vector<ChatRoom> chatrooms) {
+		this.chatrooms = chatrooms;
+	}
+
+	public Vector<ChatRoom> getChatrooms() {
+		return chatrooms;
+	}
+
 	public void loadInUsers(String directoryFileName) {
 		Vector<User> users = new Vector<User>();
 		try {
@@ -92,24 +100,16 @@ public class Server {
 			System.out.println(e);
 		}
 	}
-
-	private void setChatrooms(Vector<ChatRoom> chatrooms) {
-		this.chatrooms = chatrooms;
-	}
-
-	public Vector<ChatRoom> getChatrooms() {
-		return chatrooms;
-	}
 	
 	public Vector<ChatRoom> getUserChatrooms(String username) {
 		Vector<ChatRoom> userChatroom = new Vector<ChatRoom>();
 	    Iterator<ChatRoom> iterate = chatrooms.iterator();
         while(iterate.hasNext()) {
 			ChatRoom current = iterate.next();
-			Iterator<String> userIterate = current.getUsers().iterator();
+			Iterator<User> userIterate = current.getUsers().iterator();
 			while(userIterate.hasNext()) {
-				String currentUser = userIterate.next();
-				if (username.matches(currentUser)) {
+				User currentUser = userIterate.next();
+				if (username.matches(currentUser.getUsername())) {
 					userChatroom.add(current);
 					break;
 				}
@@ -130,9 +130,19 @@ public class Server {
 			String chatroomFilename = logDirectory + "/"  + listOfFiles[i].getName();
 			try {
 				File fileObj = new File(chatroomFilename);
-				String[] users = chatroomFilename.replace(".log","").split("-");
-				Vector<String> vectorUsers = new Vector<String>(); 
-				Collections.addAll(vectorUsers, users);
+				String[] userString = chatroomFilename.replace(".log","").split("-");
+				Vector<User> vectorUsers = new Vector<User>(); 
+				// Get the server version of the User from the username (String)
+				for (int j = 0; j < userString.length; j++){
+					Iterator<User> iterate = listUsers.iterator();
+					while(iterate.hasNext()) {
+						User current = iterate.next();
+						if (current.getUsername().matches(userString[j])) {
+							vectorUsers.add(current);
+							break;
+						}
+					}
+				}
 				Vector<Message> tmpMessageVec= new Vector<Message>();
 				Scanner reader = new Scanner(fileObj);
 				String chatroomID = null;
@@ -207,34 +217,41 @@ public class Server {
 			}
         }
 		//update it
-		Vector<String> Users = null;
+		Vector<User> chatroomUsers = null;
 		if (foundChatroom != null){
 			int index = chatrooms.indexOf(foundChatroom);
 			ChatRoom c = chatrooms.get(index);
 			c.addMessage(m);
 			chatrooms.set(index, c);
-			Users = c.getUsers();
+			chatroomUsers = c.getUsers();
 		}
 		//figure out which users are online
-		Iterator<User> iterateUsers = listUsers.iterator();
+		Iterator<User> iterateChatroomUsers = chatroomUsers.iterator();
+        while(iterateChatroomUsers.hasNext()) {
 
-        while(iterateUsers.hasNext()) {
-			User current = iterateUsers.next();
-			String username = current.getUsername();
-			int indexUser = Users.indexOf(username);
-            if ( indexUser != -1 ) { // if one of the users in the chatroom
-				if (current.getUserStatus() == UserStatus.ONLINE){ // and if online
+			User currentChatroom = iterateChatroomUsers.next();
+			String usernameChatroom = currentChatroom.getUsername();
+
+			//Get the Server version of the user
+			Iterator<User> iterateServerUsers = listUsers.iterator();
+			while(iterateServerUsers.hasNext()) {
+				User currentServer = iterateServerUsers.next();
+				String usernameServer = currentServer.getUsername();
+				if (usernameServer.matches(usernameChatroom) ) {
+					if (currentServer.getUserStatus() == UserStatus.ONLINE){
 					//send each the message
-					addToNewMessageQ(username, m);
+					addToNewMessageQ(usernameServer, m);
+					}
 				}
 			}
         }
 	}
-	
+
 	public void updateUserStatus(String user) {
         Iterator<User> iterate = listUsers.iterator();
 		User foundUser = null;
-        while(iterate.hasNext()) {
+        
+		while(iterate.hasNext()) {
 			User current = iterate.next();
             if (user.matches(current.getUsername())) {
 				foundUser = current;
@@ -263,7 +280,6 @@ public class Server {
 	
 	public Vector<Message> grabFromNewMessageQ(String User) {
 		//gets the messages from the queue
-		//
 		Vector<Message> vectorMessage= new Vector<Message>();
 		Queue<Message> newMessages = newMsg.get(User);
 		try{
@@ -294,14 +310,7 @@ public class Server {
 	}
     
 
-///////////////////////////////////
-///////////////////////////////////
-///////////////////////////////////
-///////////////////////////////////
-///////////////////////////////////
-///////////////////////////////////
-///////////////////////////////////
-
+	
 	private static class ServerHandler implements Runnable {
 		private final Socket clientSocket;
 		private String ip;
