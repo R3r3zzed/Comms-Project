@@ -1,5 +1,3 @@
-package Implementation;
-
 import java.util.Vector;
 
 
@@ -16,7 +14,7 @@ public class ChatRoom {
 		this.participantHandlers = users;
 
 	}
-	public ChatRoom(String chatID, Vector<User> users, Vector<Message>  newMessages, String filename){
+	public ChatRoom(String chatID, Vector<User> users, Vector<Message> newMessages, String filename){
 		this.chatID = chatID;
 		this.history = new ChatHistory(filename);
 		this.roomMessages = newMessages;
@@ -40,8 +38,12 @@ public class ChatRoom {
 		return this.roomMessages;
 	}
 	
-	public Vector<User>  getUsers() {
+	public Vector<User> getUsers() {
 		return participantHandlers;
+	}
+
+	public String getHistoryFile(){
+		return this.history.getChatHistoryFile();
 	}
 }
 
