@@ -97,16 +97,28 @@ public class Client {
         this.directory = updatedDirectory;
     }
     
-    public void updateChatRoom(ChatRoom room) {
-        // Assuming room has a unique identifier that we can use to find and replace it in the local list
-        for (int i = 0; i < this.rooms.size(); i++) {
-            if (this.rooms.get(i).getChatID().equals(room.getChatID())) {
-                this.rooms.set(i, room);
-                return;
+    public void updateChatRoom(String chatRoomId) {
+        try {
+            this.output.writeObject("UPDATE_CHATROOM: " + chatRoomId);
+            this.output.flush();
+            
+            if (this.input.readObject() instanceof ChatRoom) {
+                ChatRoom updatedRoom = (ChatRoom) this.input.readObject();
+                
+                for (int i = 0; i < this.rooms.size(); i++) {
+                    if (this.rooms.get(i).getChatID().equals(updatedRoom.getChatID())) {
+                        this.rooms.set(i, updatedRoom);
+                        System.out.println("Chat room updated: " + updatedRoom.getChatID());
+                        return;
+                    }
+                }
+                this.rooms.add(updatedRoom);
+            } else {
+                System.out.println("ERROR: Invalid instance");
             }
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
         }
-        // If the room is new, add it to the list
-        this.rooms.add(room);
     }
 
     
