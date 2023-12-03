@@ -3,7 +3,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 class UserTests {
-	
 	 @Test
 	 public void testGenerateID() {
 		 String id1 = User.generateID();
@@ -52,16 +51,6 @@ class UserTests {
 
         user.changeStatus(UserStatus.OFFLINE);
         assertEquals(UserStatus.OFFLINE, user.getUserStatus());
-    }
-    
-    @Test
-    public void testStatusChange() {
-    	// Test to make sure user status changes correctly
-        User user = new User("Jane Doe", "jane.doe", "password123", UserType.BASIC);
-
-        assertEquals(UserStatus.OFFLINE, user.getUserStatus());
-        user.changeStatus(UserStatus.ONLINE);
-        assertEquals(UserStatus.ONLINE, user.getUserStatus());
     }
     
     @Test
