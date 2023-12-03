@@ -3,12 +3,13 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.Vector;
 import java.util.*;
 import java.io.*;
 
 public class Client {
-    private Socket socket;
+    private Socket clienSocket;
     private ObjectInputStream input;
     private ObjectOutputStream output;
     private String serverIP;
@@ -18,41 +19,85 @@ public class Client {
     private Vector<User> directory;
     private Vector<ChatRoom> rooms;
 
-    public Client(String serverIP, int serverPort) {
-        this.serverIP = serverIP;
-        this.serverPort = serverPort;
-        this.directory = new Vector<>();
-        this.rooms = new Vector<>();
-        connect();
-    }
-    
-    // Establishes connection with the server
-    public boolean connect() {
+    public static void main(String args[]) {
+        Socket s;
         try {
-            this.socket = new Socket(this.serverIP, this.serverPort);
-            this.output = new ObjectOutputStream(socket.getOutputStream());
-            this.input = new ObjectInputStream(socket.getInputStream());
-            return true;
+            s = new Socket("localhost", 1235);
+            ClientFake client = new ClientFake(s);
+            LoginUI loginScreen = new LoginUI(client);
+            loginScreen.display();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-            return false;
         }
     }
 
-    // Attempts to log in to the server
+    public Client(Socket s) {
+        try{
+            this.clienSocket = s;
+            this.output = new ObjectOutputStream(s.getOutputStream());
+            this.input = new ObjectInputStream(s.getInputStream());
+
+            directory = new Vector<User>();
+            rooms = new Vector<ChatRoom>();
+
+        }catch (IOException e) {
+            e.printStackTrace();
+        } 
+    }
+		
+
     public boolean login(String username, String password) {
         try {
-            this.output.writeObject(username + ";;;" + password);
-            this.output.flush();
-            if (this.input.readObject() instanceof User)
-                this.currentUser = (User) this.input.readObject();                
-            return this.input.readObject() instanceof User;
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
+            String auth = String.format("%s;;;%s", username, password);
+            output.writeObject(auth);
+            output.flush();
+
+            System.out.println("Waiting on Server...");
+            Boolean confirmation = (Boolean) input.readBoolean();
+
+            if (confirmation) {
+                System.out.println(username.compareTo(username) == 0);
+                System.out.println(password.compareTo(password) == 0);
+                System.out.println("SUCCESS: logged in");
+                this.currentUser = (User) this.input.readObject();
+
+                //get the directory
+                this.directory = (Vector<User>) input.readObject();
+
+                //get the rooms
+                output.writeObject(username);
+                output.flush();
+                this.rooms = (Vector<ChatRoom>) input.readObject();
+                
+                return true;
+            }
+            System.out.println("FAILED: logged in");
             return false;
         }
+        catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            return false;
+        } 
+        
     }
-
+    
+    public Vector<User> getDirectory(){
+        return directory;
+    }
+    
+    public Vector<ChatRoom> getChatRooms(){
+        return rooms;
+    }
+    
+    public User getCurrentUser() {
+        return currentUser;
+    }
+    
     // Requests chat logs from the server
     public void requestLogs(String username) {
         try {
@@ -121,18 +166,9 @@ public class Client {
         }
     }
 
-    
     public void addRoom(ChatRoom room) {
     	if(room == null)
     		this.rooms.add(room);
-    }
-    
-    public User getCurrentUser() {
-        return currentUser;
-    }
-    
-    public Vector<User> getDirectory() {
-        return directory;
     }
 
     public Vector<ChatRoom> getRooms() {
@@ -142,25 +178,11 @@ public class Client {
     // Close the connection
     public void close() {
         try {
-            if (socket != null || input != null || output != null)
-                socket.close();
+            if (this.clienSocket != null || input != null || output != null)
+                this.clienSocket.close();
+                System.out.println("CLOSING: client");
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public static void main(String[] args) {
-        Client client = new Client("134.154.20.147", 1234);
-        client.connect();
-        
-        LoginUI loginScreen = new LoginUI();
-        loginScreen.display(client);
-
-        while (!loginScreen.isLoggedIn()){/* Wait for successful login */}
-        
-        do {
-        	MainUI mainUI = new MainUI();
-        	mainUI.display(client);
-        }while(loginScreen.isLoggedIn());
     }
 }
