@@ -52,8 +52,8 @@ public class MainUI implements GUI{
 		createPanelComponents();
 		createChatButtons();
 		createDirectoryLabels();
-		doUpdateChatScrollPane(null);
-		doUpdateDirectoryScrollPane(null);
+		doFilterChatScrollPane(null);
+		doFilterDirectoryScrollPane(null);
 		placePanelComponents();
 		
 		// open the LogsUI
@@ -84,14 +84,14 @@ public class MainUI implements GUI{
 		// filter directory based on filter input by user
 		filterDirectorySubmitButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				doUpdateDirectoryScrollPane(filterDirectoryTextField.getText());
+				doFilterDirectoryScrollPane(filterDirectoryTextField.getText());
 			}
 		});
 				
 		// filter chatrooms based on filter input by user
 		filterChatRoomSubmitButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				doUpdateChatScrollPane(filterChatRoomTextField.getText());
+				doFilterChatScrollPane(filterChatRoomTextField.getText());
 			}
 		});
 				
@@ -210,18 +210,31 @@ public class MainUI implements GUI{
 		scrollPanel.setLayout(new GridBagLayout());
 		GridBagConstraints constraints = new GridBagConstraints();
 		
-		/* TODO waiting for client side implementation 
+		/*TODO waiting for client side implementation 
 		for(int i = 0; i < client.getChatRooms().size(); i++) {
+			ChatRoom currentChatRoom = client.getChatRooms().elementAt(i);
 			constraints.fill = GridBagConstraints.BOTH;
 			constraints.weightx = 0.5;
 			constraints.weighty = 0.5;
 			constraints.gridy = i;
 			constraints.gridx = 0;
-			chatRoomButtons.add(new JButton("Button: " + i));
+			
+			// Set chatroom button name
+			// name of all the users in the 
+			String participants = "";
+			for(int j = 0; j < currentChatRoom.getUsers().size(); j++) {
+				participants += currentChatRoom.getUsers().getName();
+				if(j == currentChatRoom.getUsers().size() - 1) {
+					participants += ", ";
+				}
+			}
+			chatRoomButtons.add(new JButton(participants));
 			chatRoomButtons.elementAt(i).setPreferredSize(new Dimension(directoryScrollPane.getWidth(),frame.getHeight()/10));
 			scrollPanel.add(chatRoomButtons.elementAt(i), constraints);
 		}
 		*/
+		
+		// TODO Remove for final
 		for(int i = 0; i < 10; i++) {
 			constraints.fill = GridBagConstraints.BOTH;
 			constraints.weightx = 0.5;
@@ -232,20 +245,21 @@ public class MainUI implements GUI{
 			chatRoomButtons.elementAt(i).setPreferredSize(new Dimension(directoryScrollPane.getWidth(),frame.getHeight()/10));
 			scrollPanel.add(chatRoomButtons.elementAt(i), constraints);
 		}
+		
+		// TODO implement way to open chatRoom using CHATUID
 		for(int i = 0; i < chatRoomButtons.size(); i++) {
 			chatRoomButtons.get(i).addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					JOptionPane.showMessageDialog(scrollPanel, ((JButton)e.getSource()).getText());
+					// openChatRoom( UID ));
 				}
 			});
 		}
-		
 		chatScrollPane = new JScrollPane(scrollPanel);
 	}
 		
 	// displays only the chat rooms that have the substring filter in the participant names
 	// if "" then display everything
-	private void doUpdateChatScrollPane(String filter) {
+	private void doFilterChatScrollPane(String filter) {
 		if (filter == null) {
 			filter = "";
 		}
@@ -267,7 +281,7 @@ public class MainUI implements GUI{
 		
 		// TODO remove for final
 		for(int i = 0; i < chatRoomButtons.size(); i++) {
-			if (chatRoomButtons.elementAt(i).getText().contains(filter)) {
+			if (chatRoomButtons.elementAt(i).getText().toUpperCase().contains(filter.toUpperCase())) {
 				chatRoomButtons.elementAt(i).setVisible(true);
 			}
 			else {
@@ -301,14 +315,14 @@ public class MainUI implements GUI{
 	
 	// displays only the users that have the substring filter in their names
 	// if "" then display everything
-	private void doUpdateDirectoryScrollPane(String filter) {
+	private void doFilterDirectoryScrollPane(String filter) {
 		if (filter == null) {
 			filter = "";
 		}
 		
 		// look through list of users. If user's name contains substring filter then create make JLabel visible for it
 		for(int i = 0; i < client.getDirectory().size();i++) {
-			if(client.getDirectory().elementAt(i).getName().contains(filter)) {
+			if(client.getDirectory().elementAt(i).getName().toUpperCase().contains(filter.toUpperCase())) {
 				directoryLabels.elementAt(i).setVisible(true);
 			}
 			else {
