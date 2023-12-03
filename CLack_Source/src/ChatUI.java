@@ -6,6 +6,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Date;
 import java.util.Vector;
 
 public class ChatUI implements GUI {
@@ -133,12 +134,52 @@ public class ChatUI implements GUI {
 		}
 	}
 	
+	// creates the Labels for the messages
+	// follows the format
+	// Sent By : <name of sender>
+	// Date Sent: <date>
+	// <Content>
 	private void createMessagesScrollPaneComponents() {
-		
+		GridBagConstraints constraints = new GridBagConstraints();
+		/*	TODO uncomment
+		for (int i = 0; i < chatRoom.getHistory().size(); i++) {
+			constraints.fill = GridBagConstraints.BOTH;
+			constraints.gridx = 0;
+			constraints.gridy = i;
+			constraints.weightx = 0.5;
+			constraints.weighty = 0.5;
+			Message currentMessage = chatRoom.getHistory().elementAt(i);
+			String labelText = String.format("<html> Sent By: %s <br> Date sent %s <br> %s </html>"
+					, currentMessage.getSendBy(), currentMessage.getDateSent(), currentMessage.getContent());
+			JLabel messageLabel = new JLabel(labelText);
+			messageLabel.setPreferredSize(new Dimension(participantScrollPane.getWidth(), frame.getHeight() / 5));
+			messageLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+			messagePanel.add(participantLabel, constraints);
+		}
+		*/
+		// TODO Remove following for loop block
+		for (int i = 0; i < 30; i++) {
+			constraints.fill = GridBagConstraints.BOTH;
+			constraints.gridx = 0;
+			constraints.gridy = i;
+			constraints.weightx = 0.5;
+			constraints.weighty = 0.5;
+			String sentBy = "name" + i;
+			String content = "Hello WORLD Hello WORLDHello WORLDHello WORLDHello WORLDHello WORLDHello WORLDHello WORLDHello WORLDHello WORLDHello WORLDHello WORLDHello WORLDHello WORLDHello WORLDHello WORLDHello WORLDHello WORLDHello WORLDHello WORLDHello WORLDHello WORLD" + i;
+			String labelText = String.format("<html> Sent By: %s <br> Date sent %s <br> %s </html>"
+					, sentBy, new Date(), content);
+			JLabel messageLabel = new JLabel(labelText);
+			messageLabel.setPreferredSize(new Dimension(messageScrollPane.getWidth(), frame.getHeight() / 5));
+			messageLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+			messagePanel.add(messageLabel, constraints);
+		}
+		messageScrollPane = new JScrollPane(messagePanel);
 	}
 	
-	private void updateMessagesScrollPane() {
-		
+	public void updateMessagesScrollPane() {
+		messagePanel.removeAll();
+		createMessagesScrollPaneComponents();
+		panel.updateUI();
 	}
 	
 	// create labels for the participants
@@ -148,30 +189,35 @@ public class ChatUI implements GUI {
 		/*	TODO uncomment
 		for (int i = 0; i < chatRoom.getUsers().size(); i++) {
 			constraints.fill = GridBagConstraints.BOTH;
+			constraints.gridx = 0;
 			constraints.gridy = i;
+			constraints.weightx = 0.5;
+			constraints.weighty = 0.5;
 			JLabel participantLabel = new JLabel(chatRoom.getUsers().elementAt(i).getName());
-			participantLabel.setPreferredSize(new Dimension(participantScrollPane.getWidth(), participantScrollPane.getHeight() / 10));
+			participantLabel.setPreferredSize(new Dimension(participantScrollPane.getWidth(), frame.getHeight() / 10));
 			participantPanel.add(participantLabel, constraints);
 		}
 		*/
-		// TODO remove
-		for (int i = 0; i < 10; i++) {
+		// TODO remove for loop block
+		for (int i = 0; i < 30; i++) {
 			constraints.fill = GridBagConstraints.BOTH;
 			constraints.gridx = 0;
 			constraints.gridy = i;
-			constraints.weightx = 1;
-			constraints.weighty = 1;
+			constraints.weightx = 0.5;
+			constraints.weighty = 0.5;
 			JLabel participantLabel = new JLabel("participant" + i);
 			participantLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-			participantLabel.setPreferredSize(new Dimension(participantScrollPane.getWidth(), participantScrollPane.getHeight() / 5));
+			participantLabel.setPreferredSize(new Dimension(participantScrollPane.getWidth(), frame.getHeight() / 10));
 			participantPanel.add(participantLabel, constraints);
 		}
+		
 		participantScrollPane = new JScrollPane(participantPanel);
 		
 	}
 	
-	private void updateParticipantScrollPane() {
+	public void updateParticipantScrollPane() {
 		participantPanel.removeAll();
 		createParticipantScrollPaneComponents();
+		panel.updateUI();
 	}
 }
