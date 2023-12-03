@@ -7,10 +7,11 @@ import java.awt.event.ActionListener;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.util.StringTokenizer;
 import java.util.Vector;
 
 public class MainUI implements GUI{
-	private ClientFake client;
+	private Client client;
 	private JFrame frame;
 	private JPanel panel;
 	private User currentUser;
@@ -30,10 +31,9 @@ public class MainUI implements GUI{
 	private JButton viewLogsButton;
 	private JLabel userLabel;
 	
-	private ChatUI chatUI;
 	private LogsUI logsUI;
 	
-	public MainUI(ClientFake client) {
+	public MainUI(Client client) {
 		this.client = client;
 		currentUser = client.getCurrentUser();
 	}
@@ -64,15 +64,19 @@ public class MainUI implements GUI{
 			}
 		} );
 		
-		// TODO needs to be implemented on client side
-		/*
+		
 		// create new chatroom, then open chatroom UI for it
+		// TODO 1 client.openChatRoom needs to take in a string that represents chatUID
+		// TODO 2 openChatRoom needs to parse the string and check if the chatroom already exists. Otherwise it creates
+		// TODO 3 a new one and returns that chatRoom
 		createChatRoomButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				client.createChatRoom()
+				String chatUID = "Fix";
+				ChatUI chatUI = new ChatUI(client.openChatRoom(chatUID));
+				chatUI.display();
 			}
 		});
-		*/
+		
 		
 		// stop the program
 		logoutButton.addActionListener(new ActionListener() {
@@ -210,7 +214,7 @@ public class MainUI implements GUI{
 		scrollPanel.setLayout(new GridBagLayout());
 		GridBagConstraints constraints = new GridBagConstraints();
 		
-		/*TODO waiting for client side implementation 
+		// TODO waiting for client side implementation 
 		for(int i = 0; i < client.getChatRooms().size(); i++) {
 			ChatRoom currentChatRoom = client.getChatRooms().elementAt(i);
 			constraints.fill = GridBagConstraints.BOTH;
@@ -223,8 +227,9 @@ public class MainUI implements GUI{
 			// name of all the users in the 
 			String participants = "";
 			for(int j = 0; j < currentChatRoom.getUsers().size(); j++) {
-				participants += currentChatRoom.getUsers().getName();
-				if(j == currentChatRoom.getUsers().size() - 1) {
+				participants += currentChatRoom.getChatID() + ":";
+				participants += currentChatRoom.getUsers().elementAt(j).getName();
+				if(j != currentChatRoom.getUsers().size() - 1) {
 					participants += ", ";
 				}
 			}
@@ -232,25 +237,15 @@ public class MainUI implements GUI{
 			chatRoomButtons.elementAt(i).setPreferredSize(new Dimension(directoryScrollPane.getWidth(),frame.getHeight()/10));
 			scrollPanel.add(chatRoomButtons.elementAt(i), constraints);
 		}
-		*/
-		
-		// TODO Remove for final
-		for(int i = 0; i < 10; i++) {
-			constraints.fill = GridBagConstraints.BOTH;
-			constraints.weightx = 0.5;
-			constraints.weighty = 0.5;
-			constraints.gridy = i;
-			constraints.gridx = 0;
-			chatRoomButtons.add(new JButton("Button: " + i));
-			chatRoomButtons.elementAt(i).setPreferredSize(new Dimension(directoryScrollPane.getWidth(),frame.getHeight()/10));
-			scrollPanel.add(chatRoomButtons.elementAt(i), constraints);
-		}
-		
-		// TODO implement way to open chatRoom using CHATUID
+
 		for(int i = 0; i < chatRoomButtons.size(); i++) {
 			chatRoomButtons.get(i).addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					// openChatRoom( UID ));
+					JButton eventSource = (JButton) e.getSource();
+					StringTokenizer strtok = new StringTokenizer(eventSource.getText());
+					String id = strtok.nextToken(":");
+					ChatUI chatUI = new ChatUI(client.openChatRoom(id));	// TODO needs to be implemented on client side
+					chatUI.display();
 				}
 			});
 		}
@@ -264,29 +259,15 @@ public class MainUI implements GUI{
 			filter = "";
 		}
 		
-		/* TODO Wait for Chatroom to implemented then uncomment
 		// look through list of participants. If any of the users' name contains substring filter then make JButton visible for it
-		for(int i = 0; i < client.getChatRooms().size();i++) {
-			Vector<User> participants = client.getChatRooms().elementAt(i).getParticipants();		// TODO Needs to be implemented
-			for(int j = 0; j < participants.size(); j++) {
-				if(participants.elementAt(i).getName().contains(filter)) {
+		for(int i = 0; i < chatRoomButtons.size();i++) {
+			String participants =  chatRoomButtons.elementAt(i).getText();
+				if(participants.contains(filter)) {
 					chatRoomButtons.elementAt(i).setVisible(true);
 				}
 				else {
 					chatRoomButtons.elementAt(i).setVisible(false);
 				}
-			}
-		}
-		*/
-		
-		// TODO remove for final
-		for(int i = 0; i < chatRoomButtons.size(); i++) {
-			if (chatRoomButtons.elementAt(i).getText().toUpperCase().contains(filter.toUpperCase())) {
-				chatRoomButtons.elementAt(i).setVisible(true);
-			}
-			else {
-				chatRoomButtons.elementAt(i).setVisible(false);
-			}
 		}
 		
 		chatScrollPane.updateUI();
