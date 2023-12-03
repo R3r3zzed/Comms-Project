@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.concurrent.*; 
 
 public class Server {
+	private String logPathString;
 	private Vector<User> listUsers;
 	private Vector<ChatRoom> chatrooms;
 	private ConcurrentHashMap<String, ConcurrentLinkedQueue<Message>> newMsg;
@@ -20,11 +21,12 @@ public class Server {
   	public static void main(String[] args){
 		ServerSocket server = null;
 		try {	
-			Logger terminalLogger;		
+			Logger terminalLogger;	
 			terminalLogger = System.getLogger("Server");
-			terminalLogger.log(Level.INFO, "Server is starting");	
+			terminalLogger.log(Level.INFO, "Server is starting");
 			server = new ServerSocket(1235);
 			server.setReuseAddress(true);
+
 			while (true) {
 				Socket client = server.accept();
 				ServerHandler clientSock = new ServerHandler(client);
@@ -47,10 +49,9 @@ public class Server {
 		}
     }
   	
-  	public Server() {  	
-		
-		loadInUsers("directory.txt"); // loads all companies Users into the server.Users array
-		loadInChatRooms("logs"); // loads all Chat rooms for all users into the server.chatrooms array
+  	public Server() {  
+		loadInUsers("./directory.txt"); // loads all companies Users into the server.Users array
+		loadInChatRooms("./logs"); // loads all Chat rooms for all users into the server.chatrooms array
 		newMsg = new ConcurrentHashMap<String, ConcurrentLinkedQueue<Message>>();
   	}
   	public Server(String testDirectory, String testLogDirectory) { 		
@@ -75,6 +76,7 @@ public class Server {
 	}
 
 	public void loadInUsers(String directoryFileName) {
+		setListUsers(null);
 		Vector<User> users = new Vector<User>();
 		try {
 			File fileObj = new File(directoryFileName);
@@ -119,18 +121,23 @@ public class Server {
 	}
 
 	public void loadInChatRooms(String logDirectory) {
+		this.logPathString = logDirectory;
+		setChatrooms(null);
 		File folder = new File(logDirectory);
 		File[] listOfFiles = folder.listFiles();
 		Vector<ChatRoom> chatrooms = new Vector<ChatRoom>();
 		if (listOfFiles == null) {
 			// add logging to show that logs were empty
+			System.out.println("Unable to see log file in dir: " + logDirectory);
 			return;
 		}
 		for (int i = 0; i < listOfFiles.length; i++) {		
 			String chatroomFilename = logDirectory + "/"  + listOfFiles[i].getName();
 			try {
 				File fileObj = new File(chatroomFilename);
-				String[] userString = chatroomFilename.replace(".log","").split("-");
+				String[] fileSplit = chatroomFilename.replace(".log","").split("/");
+				String chatroomID = fileSplit[fileSplit.length-1];
+				String[] userString = chatroomID.split("-");
 				Vector<User> vectorUsers = new Vector<User>(); 
 				// Get the server version of the User from the username (String)
 				for (int j = 0; j < userString.length; j++){
@@ -143,21 +150,7 @@ public class Server {
 						}
 					}
 				}
-				Vector<Message> tmpMessageVec= new Vector<Message>();
-				Scanner reader = new Scanner(fileObj);
-				String chatroomID = null;
-				while (reader.hasNextLine()) {                
-					String messageInfo = reader.nextLine();
-					//file contents per line
-					//sentBy;;;dateSent;;;chatroomUID;;;msgStatus;;;content
-					String[] messageArray = messageInfo.split(";;;");
-					DateFormat df = new SimpleDateFormat("EEE MMM dd kk:mm:ss zzz yyyy");
-					Date date = df.parse(messageArray[1]);
-					chatroomID = messageArray[2];
-					tmpMessageVec.add(new Message(messageArray[0], date, messageArray[2], messageArray[3], msgType.TEXT, messageArray[4]));
-				}
-				reader.close();
-				chatrooms.add(new ChatRoom(chatroomID, vectorUsers, tmpMessageVec, chatroomFilename));
+				chatrooms.add(new ChatRoom(chatroomID, vectorUsers, chatroomFilename));
 
 			} catch (Exception e) {
 				System.out.println(e);
@@ -186,11 +179,11 @@ public class Server {
 		return false;	
 	}
 
-	public User getUser(String user, String pass) {
+	public User getUser(String user) {
         Iterator<User> iterate = listUsers.iterator(); //first user
         while(iterate.hasNext()) {
 			User current = iterate.next();
-            if (user.matches(current.getUsername()) && pass.matches(current.getPassword())) {
+            if (user.matches(current.getUsername())) {
 				return current;
 			}
         }
@@ -205,18 +198,20 @@ public class Server {
 		return terminalLogger;
 	}
 
-	public void updateNewMessage(String sender, Message m){
-		//figure out which chatroom this message belongs to
+	public void updateNewMessage(Message m){
 		String chatroomID = m.getChatroomID();
+
+		//figure out which chatroom this message belongs to
 		Iterator<ChatRoom> iterate = chatrooms.iterator();
 		ChatRoom foundChatroom = null;
         while(iterate.hasNext()) {
 			ChatRoom current = iterate.next();
             if (chatroomID.matches(current.getChatID() )) {
 				foundChatroom = current;
+				break;
 			}
         }
-		//update it
+		//update it if it exist
 		Vector<User> chatroomUsers = null;
 		if (foundChatroom != null){
 			int index = chatrooms.indexOf(foundChatroom);
@@ -225,12 +220,24 @@ public class Server {
 			chatrooms.set(index, c);
 			chatroomUsers = c.getUsers();
 		}
+		//make a new chatroom
+		else{
+			chatroomUsers = new Vector<User>();
+			String[] users = chatroomID.split("-");
+			for (int i = 0; i < users.length; i++){
+				chatroomUsers.add(getUser(users[i]));
+			}
+			ChatRoom newChatroom = new ChatRoom(chatroomID, chatroomUsers, new Vector<Message>(), this.logPathString+"/"+chatroomID+".log" );
+			newChatroom.addMessage(m);
+			chatrooms.add(newChatroom);
+		}
+
 		//figure out which users are online
 		Iterator<User> iterateChatroomUsers = chatroomUsers.iterator();
         while(iterateChatroomUsers.hasNext()) {
 			User currentChatroom = iterateChatroomUsers.next();
 			String usernameChatroom = currentChatroom.getUsername();
-			if (sender.matches(usernameChatroom)){
+			if (m.getSendBy().matches(usernameChatroom)){
 				continue;
 			}
 			//Get the Server version of the user
@@ -272,6 +279,10 @@ public class Server {
 		}
 	}
 	
+	public ConcurrentHashMap<String, ConcurrentLinkedQueue<Message>> getNewMsgQ(){
+		return this.newMsg;
+	}
+
 	public void setUpUserQ(String User){
 		ConcurrentLinkedQueue<Message> newQ = new ConcurrentLinkedQueue<Message>();
 		newMsg.put(User, newQ);
@@ -310,8 +321,7 @@ public class Server {
 	}
     
 
-	
-	private static class ServerHandler implements Runnable {
+	public static class ServerHandler implements Runnable {
 		private final Socket clientSocket;
 		private String ip;
 		private Vector<ChatRoom> currentChatRooms;
@@ -326,11 +336,16 @@ public class Server {
 
 		public ServerHandler(Socket socket){
 			this.clientSocket = socket;
+			if (this.clientSocket != null){
 			this.ip = this.clientSocket.getInetAddress().getHostAddress();
+			}
 		}		
 		
 		public void run(){
 			//create the in and out to the client 
+			if (this.clientSocket == null){
+				return;
+			}
 			try {
 				OutputStream outputStream = this.clientSocket.getOutputStream();
 				InputStream inputStream = this.clientSocket.getInputStream();
@@ -343,25 +358,40 @@ public class Server {
 
 				// //Who is logging on
 				Boolean ValidUser = false;
+
 				while(! ValidUser){
+					//first read from client
 					String UserAndPassword = (String) objectInputStream.readObject();
 					String[] userInfo = UserAndPassword.split(";;;");
 					ValidUser = ServerInfo.UserAuthentication(userInfo[0], userInfo[1]);
-					this.currentUser = ServerInfo.getUser(userInfo[0], userInfo[1]);
+					this.currentUser = ServerHandler.ServerInfo.getUser(userInfo[0]);
 					System.out.println(UserAndPassword);
 					System.out.println(ValidUser);
 
 					if (ValidUser){
 						//add log to server to show which user is online
 						// return a true boolean to tell the user is online
+						//send over Boolean
 						objectOutputStream.writeBoolean(ValidUser);
 						objectOutputStream.flush();
+
 						ServerInfo.updateUserStatus(userInfo[0]);
 						// Thread.sleep(40);
+						//send over User
 						objectOutputStream.writeObject(this.currentUser);
 						objectOutputStream.flush();
-
 						System.out.println(this.currentUser.getUsername() + " is online");
+
+						//send directory
+						objectOutputStream.writeObject(ServerHandler.ServerInfo.getListUsers());
+						objectOutputStream.flush();
+
+						//get the chatrooms of the user given
+						String userGiven = (String) objectInputStream.readObject();
+						this.currentChatRooms = ServerHandler.ServerInfo.getUserChatrooms(userGiven);
+						objectOutputStream.writeObject(this.currentChatRooms);
+						objectOutputStream.flush();
+
 					}
 					else {
 						// return a false boolean to tell the user is not valid
@@ -379,12 +409,30 @@ public class Server {
 				// Both method for getting new messages and sending new messages get its own thread
 				// Getting messages from server is constant in another thread but getting messages from client this main thread (need to know when to log out)
 				
-				receiveNewMessageClass newMessageClass = new receiveNewMessageClass(this.currentUser, this.ServerInfo, objectOutputStream);
+				receiveNewMessageClass newMessageClass = new receiveNewMessageClass(this.currentUser, objectOutputStream);
 				Thread newMessageThread = new Thread(newMessageClass);
 				newMessageThread.start();
 				
 				// Get the different messages from client
 				while (true) {
+					//tmp: 
+					Vector<Message> newMessages = ServerHandler.ServerInfo.grabFromNewMessageQ(this.currentUser.getUsername());
+					if (newMessages != null){
+						//Send all messages in the queue to the the client
+						System.out.println(String.format("%s has %d new messages",this.currentUser.getUsername(), newMessages.size()));
+						Iterator<Message> iterate = newMessages.iterator();
+						while(iterate.hasNext()) {
+							Message currentMessage = iterate.next();
+							try {
+								objectOutputStream.writeObject(currentMessage);
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+						}
+					}
+					else{
+						System.out.println(String.format("%s has no new messages", this.currentUser.getUsername()));
+					}
 					// wait for a new messages from client
 					Message newMessage = (Message) objectInputStream.readObject();
 					// check if message is a log out message
@@ -396,7 +444,7 @@ public class Server {
 					}
 					System.out.println(newMessage.toString());
 					//update server and other users of new message - it will send to all users including the user it was sent from
-					ServerInfo.updateNewMessage(this.currentUser.getUsername() ,newMessage);
+					ServerInfo.updateNewMessage(newMessage);
 				}
 			} catch (SocketException e){
 				e.printStackTrace();
@@ -427,7 +475,6 @@ public class Server {
 			//Sent all messages and chats with this user in it
 			//Step 1: Find the chats with user in it
 			Vector<ChatRoom> userChatroomsFromServer = ServerInfo.getUserChatrooms(this.currentUser.getUsername());
-			
 			//Step 2: Send their file over the network using the dataOutputStream object
 			Iterator<ChatRoom> iterate = userChatroomsFromServer.iterator();
 			while(iterate.hasNext()) {
@@ -467,24 +514,17 @@ public class Server {
 	public static class receiveNewMessageClass implements Runnable {
 		private ObjectOutputStream outTunnel;
 		private User user;
-		private Server serverInfo;
-		private Boolean runner;
 		
-		public receiveNewMessageClass(User u, Server s, ObjectOutputStream outObject) {
+		public receiveNewMessageClass(User u, ObjectOutputStream outObject) {
 			this.outTunnel = outObject;
 			this.user = u;
-			this.serverInfo = s;
-			this.runner = true;
-		}
-
-		public void finish() {
-			this.runner = false;
+			// this.serverInfo = s;
 		}
 		
 		public void run(){
-			while(this.runner){
+			while(!Thread.interrupted()){
 				//check to see if there are new messages for User
-				Vector<Message> newMessages = this.serverInfo.grabFromNewMessageQ(this.user.getUsername());
+				Vector<Message> newMessages = ServerHandler.ServerInfo.grabFromNewMessageQ(this.user.getUsername());
 				if (newMessages != null){
 					//Send all messages in the queue to the the client
 					System.out.println(String.format("%s has %d new messages",this.user.getUsername(), newMessages.size()));
