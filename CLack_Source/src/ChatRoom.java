@@ -10,7 +10,7 @@ public class ChatRoom {
 	public ChatRoom(String chatID, Vector<User> users, String filename){
 		this.chatID = chatID;
 		this.history = new ChatHistory(filename);
-		this.roomMessages = new Vector<Message>();
+		this.roomMessages = this.history.loadChatRoomFiles();
 		this.participantHandlers = users;
 
 	}
@@ -23,6 +23,7 @@ public class ChatRoom {
 
 	public void addMessage(Message m){
 		roomMessages.add(m);
+		writeToFile(m);
 	}
 
 	//getters	
@@ -44,6 +45,9 @@ public class ChatRoom {
 
 	public String getHistoryFile(){
 		return this.history.getChatHistoryFile();
+	}
+	public void writeToFile(Message m){
+		this.history.updateChatRoomFile(m);
 	}
 }
 
