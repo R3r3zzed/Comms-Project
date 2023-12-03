@@ -11,7 +11,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 public class LoginUI implements GUI {
-	ClientFake client;
+	Client client;
 	private JFrame frame;
 	private JPanel panel;
 	private String username;
@@ -24,7 +24,7 @@ public class LoginUI implements GUI {
 	private Boolean isLoggedIn = false;
 	int textFieldCharLimit = 20;
 	
-	public LoginUI(ClientFake client) {
+	public LoginUI(Client client) {
 		this.client = client;
 	}
 	
