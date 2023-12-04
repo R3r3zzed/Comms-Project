@@ -87,13 +87,13 @@ public class Client {
 
     public void updateMessage(Message m){
         //update chatroom 
-        String chatroom = m.getChatroomID();
+        String chatroomID = m.getChatroomID();
+        updateChatRoom(chatroomID, m);
 
         //send to the server
-        // loadChatRoom(m);
-
+        sendMessageToServer(m);
     } 
-    
+
     public Vector<User> getDirectory(){
         return directory;
     }
@@ -105,23 +105,11 @@ public class Client {
     public User getCurrentUser() {
         return currentUser;
     }
-    
-
-    // Opens a chat room
-    public void openChatRoom(String id){
-        try {
-            this.output.writeObject("OPEN_CHAT: " + id);
-            this.output.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
 
     // Sends a message to the server
-    public void sendMessageToServer(String message) {
+    public void sendMessageToServer(Message m) {
         try {
-            this.output.writeObject("MESSAGE: " + message);
+            this.output.writeObject(m);
             this.output.flush();
         } catch (IOException e) {
             e.printStackTrace();
@@ -132,32 +120,39 @@ public class Client {
         this.directory = updatedDirectory;
     }
     
-    public void updateChatRoom(String chatRoomId) {
-        try {
-            
-            if (this.input.readObject() instanceof ChatRoom) {
-                ChatRoom updatedRoom = (ChatRoom) this.input.readObject();
-                
-                for (int i = 0; i < this.rooms.size(); i++) {
-                    if (this.rooms.get(i).getChatID().equals(updatedRoom.getChatID())) {
-                        this.rooms.set(i, updatedRoom);
-                        System.out.println("Chat room updated: " + updatedRoom.getChatID());
-                        return;
-                    }
-                }
-                this.rooms.add(updatedRoom);
-            } else {
-                System.out.println("ERROR: Invalid instance");
-            }
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
+    public void updateChatRoom(String chatroomID, Message m) {
+        //find the chatroom in rooms object
+		//figure out which chatroom this message belongs to
+		Iterator<ChatRoom> iterate = rooms.iterator();
+		ChatRoom foundChatroom = null;
+        while(iterate.hasNext()) {
+			ChatRoom current = iterate.next();
+            if (chatroomID.matches(current.getChatID() )) {
+				foundChatroom = current;
+				break;
+			}
         }
+		//update it if it exist
+		if (foundChatroom != null){
+			int index = rooms.indexOf(foundChatroom);
+			ChatRoom c = rooms.get(index);
+			c.addMessage(m);
+			rooms.set(index, c);
+		}
     }
 
-    public void addRoom(ChatRoom room) {
-    	if(room == null)
-    		this.rooms.add(room);
-    }
+    // public void createChatRoom(String chatroomID){
+    //     Vector<User> chatroomUsers = new Vector<User>();
+    //     String[] users = chatroomID.split("-");
+    //     for (int i = 0; i < users.length; i++){
+    //         directory
+    //         User u = 
+    //         chatroomUsers.add(getUser(users[i]));
+    //     }
+    //     ChatRoom newChatroom = new ChatRoom(chatroomID, chatroomUsers, new Vector<Message>(), this.logPathString+"/"+chatroomID+".log" );
+    //     newChatroom.addMessage(m);
+    //     rooms.add(newChatroom);
+    // }
 
     public Vector<ChatRoom> getRooms() {
         return rooms;
