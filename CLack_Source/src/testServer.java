@@ -59,8 +59,8 @@ class testServer {
 	@Test 
 	void testNewMessage(){
 		String sender = "madison";
-		Message existingChatRoom = new Message(sender, new Date(), "madison-sean-david-sedat-joseph", "Sent", msgType.TEXT, "message from existingChatRoom");
-		Message newChatRoom = new Message(sender, new Date(), "madison-root", "Sent", msgType.TEXT, "message from existingChatRoom");
+		Message existingChatRoom = new Message(sender, new Date(), "madison-sean-david-sedat-joseph", msgStatus.SENT, msgType.TEXT, "message from existingChatRoom");
+		Message newChatRoom = new Message(sender, new Date(), "madison-root", msgStatus.SENT, msgType.TEXT, "message from existingChatRoom");
 		//send the new message to the 
 		int originalChatroomsNumber = this.normalServer.getChatrooms().size();
 		this.normalServer.updateNewMessage(existingChatRoom);
@@ -95,8 +95,8 @@ class testServer {
 		this.normalServer.setUpUserQ("madison");
 		this.normalServer.setUpUserQ("root");
 
-		Message toRoot = new Message("madison", new Date(), "madison-root", "Sent", msgType.TEXT, "testing Q sending to root");
-		Message toMadison = new Message("root", new Date(), "madison-root", "Sent", msgType.TEXT, "testing Q sending to madison");
+		Message toRoot = new Message("madison", new Date(), "madison-root", msgStatus.SENT, msgType.TEXT, "testing Q sending to root");
+		Message toMadison = new Message("root", new Date(), "madison-root", msgStatus.SENT, msgType.TEXT, "testing Q sending to madison");
 
 		this.normalServer.addToNewMessageQ("root", toRoot);
 		this.normalServer.addToNewMessageQ("madison", toMadison);
