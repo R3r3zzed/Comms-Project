@@ -362,10 +362,14 @@ public class Server {
 					//first read from client
 					String UserAndPassword = (String) objectInputStream.readObject();
 					String[] userInfo = UserAndPassword.split(";;;");
-					ValidUser = ServerInfo.UserAuthentication(userInfo[0], userInfo[1]);
-					this.currentUser = ServerHandler.ServerInfo.getUser(userInfo[0]);
-					System.out.println(UserAndPassword);
-					System.out.println(ValidUser);
+					if (userInfo.length < 2){
+						ValidUser = false;
+					}else{
+						ValidUser = ServerInfo.UserAuthentication(userInfo[0], userInfo[1]);
+						this.currentUser = ServerHandler.ServerInfo.getUser(userInfo[0]);
+						System.out.println(UserAndPassword);
+						System.out.println(ValidUser);
+					}
 
 					if (ValidUser){
 						//all the housekeeping for a newly logged in user
