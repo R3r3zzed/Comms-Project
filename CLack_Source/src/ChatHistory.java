@@ -46,9 +46,16 @@ public class ChatHistory {
 					java.util.Date dateSent = formatter.parse(parts[1]);
 					String chatroomID = parts[2];
 					String status = parts[3];
+					msgStatus currentStatus;
+					if (status.toUpperCase().matches(msgStatus.SENT.toString())){
+						currentStatus = msgStatus.SENT;
+					} else {
+						currentStatus = msgStatus.RECEIVED;	
+					}
+
 					String content = parts[4];
 
-					Message message = new Message(sentBy, dateSent, chatroomID, status, msgType.TEXT, content);
+					Message message = new Message(sentBy, dateSent, chatroomID, currentStatus, msgType.TEXT, content);
 					messageVector.add(message);
 				}
 			}

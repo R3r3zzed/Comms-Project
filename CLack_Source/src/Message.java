@@ -9,16 +9,11 @@ public class Message implements Serializable {
 	private String content;
     private msgType type;
     
-    public Message(String username, Date originalDate, String chatroomID, String status, msgType type, String text){
+    public Message(String username, Date originalDate, String chatroomID, msgStatus status, msgType type, String text){
         this.sentBy = username;
         this.dateSent = originalDate;
         this.chatroomUID = chatroomID;
-        if (status.toUpperCase().matches(msgStatus.SENT.toString())){
-            currentMsgStatus = msgStatus.SENT;
-        }
-        else{
-            currentMsgStatus = msgStatus.RECEIVED;
-        }
+        this.currentMsgStatus = status;
         this.content = text;
         this.type = type;
 
