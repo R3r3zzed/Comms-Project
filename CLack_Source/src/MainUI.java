@@ -31,6 +31,7 @@ public class MainUI implements GUI{
 	private JButton viewLogsButton;
 	private JLabel userLabel;
 	
+	private ChatUI chatUI;
 	private LogsUI logsUI;
 	
 	public MainUI(Client client) {
@@ -111,7 +112,7 @@ public class MainUI implements GUI{
 					return;
 				}
 				
-				ChatUI chatUI = new ChatUI(client, client.openChatRoom(chatID), false);
+				chatUI = new ChatUI(client, client.openChatRoom(chatID), false);
 				chatUI.display();
 			}
 		});
@@ -266,8 +267,8 @@ public class MainUI implements GUI{
 			// Set chatroom button name
 			// name of all the users in the 
 			String participants = "";
+			participants += currentChatRoom.getChatID() + ":";
 			for(int j = 0; j < currentChatRoom.getUsers().size(); j++) {
-				participants += currentChatRoom.getChatID() + ":";
 				participants += currentChatRoom.getUsers().elementAt(j).getName();
 				if(j != currentChatRoom.getUsers().size() - 1) {
 					participants += ", ";
@@ -284,7 +285,7 @@ public class MainUI implements GUI{
 					JButton eventSource = (JButton) e.getSource();
 					StringTokenizer strtok = new StringTokenizer(eventSource.getText());
 					String id = strtok.nextToken(":");
-					ChatUI chatUI = new ChatUI(client, client.openChatRoom(id), false);
+					chatUI = new ChatUI(client, client.openChatRoom(id), false);
 					chatUI.display();
 				}
 			});
@@ -354,10 +355,19 @@ public class MainUI implements GUI{
 		directoryScrollPane.updateUI();
 	}
 	
+	public void updateChatScrollPane() {
+		createChatButtons();
+		panel.updateUI();
+	}
+	
 	// tells the client to close. Closes sockets
 	public void close() {
 		frame.setVisible(false);
 		frame.dispose();
 		client.close();
 	}
+	
+	 public ChatUI getChatUI() {
+		 return chatUI;
+	 } 
 }
