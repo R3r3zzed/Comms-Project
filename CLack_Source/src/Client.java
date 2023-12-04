@@ -243,7 +243,7 @@ public class Client {
     	return new ChatRoom(chatID, participants, new Vector<Message>(), filename);
     }
     
-    public void setMain(MainUI mainUI) {
+    public void setMainUI(MainUI mainUI) {
     	this.mainUI = mainUI;
     }
     // Close the connection
