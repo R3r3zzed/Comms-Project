@@ -95,10 +95,7 @@ public class MainUI implements GUI{
 				if(participants.get(participants.size() - 1).getUserID().compareTo(chatID) > 0) {
 					participants.add(currentUser);
 				}
-				
-				for(int i = 0; i < participants.size(); i++) {
-					
-				}
+
 				chatID = "";
 				for(int i = 0; i < participants.size(); i++) {
 					chatID += participants.elementAt(i).getUserID();
