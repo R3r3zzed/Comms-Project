@@ -187,8 +187,6 @@ public class Client {
     			}
     		}
     		if (isFound == true) {
-    			System.out.println("ChatID: " + chatID);
-    			System.out.println("currentRoomID: " + chatID);
     			return currentRoom;
     		}
     	}
@@ -206,7 +204,6 @@ public class Client {
     		if(i != participants.size() - 1) {
     			filename += "-";
     		}
-    		System.out.println(participants.get(i).getUserID());
     	}
     	filename += ".log";
     	return new ChatRoom(chatID, participants, new Vector<Message>(), filename);
