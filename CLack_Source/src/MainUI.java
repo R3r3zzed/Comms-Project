@@ -68,7 +68,6 @@ public class MainUI implements GUI{
 		// create new chatroom, then open chatroom UI for it
 		createChatRoomButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("Here in ActionPerformed CreateChatRoomBUTTON");	// TODO REMOVE
 				String prompt = "Enter the ids of the user you want to send a message to with '-' as delimiters";
 				prompt += "\ne.g 0-5-10-13";
 				String chatID = JOptionPane.showInputDialog(prompt);
@@ -82,13 +81,24 @@ public class MainUI implements GUI{
 					String userID = strtok.nextToken("-");
 					for(int i = 0; i < client.getDirectory().size(); i++) {
 						User user = client.getDirectory().elementAt(i);
-						if(user.getUserID().compareToIgnoreCase(userID) == 0) {
+						if(user.getUserID().compareToIgnoreCase(userID) == 0
+								&& (user.getUserID().compareToIgnoreCase(currentUser.getUserID()) != 0)) {
 							participants.add(user);
 							break;
+						}
+						if(user == currentUser) {
+							participants.add(user);
 						}
 					}
 				}
 				
+				if(participants.get(participants.size() - 1).getUserID().compareTo(chatID) > 0) {
+					participants.add(currentUser);
+				}
+				
+				for(int i = 0; i < participants.size(); i++) {
+					
+				}
 				chatID = "";
 				for(int i = 0; i < participants.size(); i++) {
 					chatID += participants.elementAt(i).getUserID();
@@ -98,13 +108,12 @@ public class MainUI implements GUI{
 				}
 				// Check if any user was selected
 				// if vector is empty don't create a chatroom and display error message
-				if (participants.size() == 0) {
+				if (participants.size() <= 1) {
 					String errorMessage = "Follow the format or make sure that at least one of the user ID is valid";
 					JOptionPane.showMessageDialog(panel, errorMessage);
 					return;
 				}
 				
-				System.out.println("In MAINUI: Opening ChatRoom with ID: " + chatID);
 				ChatUI chatUI = new ChatUI(client, client.openChatRoom(chatID), false);
 				chatUI.display();
 			}
