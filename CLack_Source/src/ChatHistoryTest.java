@@ -1,4 +1,3 @@
-package Implementation;
 
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -57,6 +56,4 @@ public class ChatHistoryTest {
     public void testChatHistoryFileSetting() {
         assertEquals(testFileName, chatHistory.getChatHistoryFile(), "Chat history file name should match the one set");
     }
-
-    // Add additional tests as needed...
 }
