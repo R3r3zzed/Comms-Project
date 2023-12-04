@@ -108,10 +108,5 @@ class testServer {
 		//check to see if root have 
 		Vector<Message> madisonQ = this.normalServer.grabFromNewMessageQ("madison");
 		assertEquals(1, madisonQ.size());
-
-
-
 	}
-	
-
 }
