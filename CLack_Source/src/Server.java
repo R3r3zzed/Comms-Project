@@ -223,9 +223,11 @@ public class Server {
 		//make a new chatroom
 		else{
 			chatroomUsers = new Vector<User>();
+
 			String[] users = chatroomID.split("-");
 			for (int i = 0; i < users.length; i++){
-				chatroomUsers.add(getUser(users[i]));
+				int number = Integer.parseInt(users[i]);
+				chatroomUsers.add(getUser(listUsers.get(number).getUsername()));
 			}
 			ChatRoom newChatroom = new ChatRoom(chatroomID, chatroomUsers, new Vector<Message>(), this.logPathString+"/"+chatroomID+".log" );
 			newChatroom.addMessage(m);
