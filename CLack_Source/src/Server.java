@@ -508,7 +508,6 @@ public class Server {
 				try {
 					Thread.sleep(5000);
 				} catch (InterruptedException e) {
-					System.exit(0);
 					return;
 				}
 			}
