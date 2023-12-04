@@ -308,7 +308,7 @@ public class Server {
 				vectorMessage.add(newMessages.remove());
 			}
 			return vectorMessage;
-	}
+		}
 		catch (java.lang.NullPointerException e) {
 			return null;
 		}
@@ -327,7 +327,6 @@ public class Server {
 		private Vector<ChatRoom> currentChatRooms;
 		private ObjectInputStream objectInputStream;
 		private ObjectOutputStream objectOutputStream;
-		private DataOutputStream dataOutputStream;
 
 		private User currentUser;
 		
@@ -351,12 +350,10 @@ public class Server {
 				InputStream inputStream = this.clientSocket.getInputStream();
 
 				//for single messages and other objects
-				ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
-				ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
-				//for files
-				DataOutputStream dataOutputStream = new DataOutputStream(new BufferedOutputStream(outputStream));
+				this.objectOutputStream = new ObjectOutputStream(outputStream);
+				this.objectInputStream = new ObjectInputStream(inputStream);
 
-				// //Who is logging on
+				//Who is logging on
 				Boolean ValidUser = false;
 
 				while(! ValidUser){
@@ -369,6 +366,8 @@ public class Server {
 					System.out.println(ValidUser);
 
 					if (ValidUser){
+						//all the housekeeping for a newly logged in user
+
 						//add log to server to show which user is online
 						// return a true boolean to tell the user is online
 						//send over Boolean
@@ -392,6 +391,8 @@ public class Server {
 						objectOutputStream.writeObject(this.currentChatRooms);
 						objectOutputStream.flush();
 
+						ServerInfo.setUpUserQ(this.currentUser.getUsername());
+
 					}
 					else {
 						// return a false boolean to tell the user is not valid
@@ -400,11 +401,6 @@ public class Server {
 						System.out.println("Error with confirmation, try again...");
 					}
 				}
-				// Send over all messages to client, and updated server on the online status of the user
-				// FirstTimeLogin();
-
-				ServerInfo.setUpUserQ(this.currentUser.getUsername());
-
 
 				// Both method for getting new messages and sending new messages get its own thread
 				// Getting messages from server is constant in another thread but getting messages from client this main thread (need to know when to log out)
@@ -412,53 +408,37 @@ public class Server {
 				receiveNewMessageClass newMessageClass = new receiveNewMessageClass(this.currentUser, objectOutputStream);
 				Thread newMessageThread = new Thread(newMessageClass);
 				newMessageThread.start();
-				
-				// Get the different messages from client
-				while (true) {
-					//tmp: 
-					Vector<Message> newMessages = ServerHandler.ServerInfo.grabFromNewMessageQ(this.currentUser.getUsername());
-					if (newMessages != null){
-						//Send all messages in the queue to the the client
-						System.out.println(String.format("%s has %d new messages",this.currentUser.getUsername(), newMessages.size()));
-						Iterator<Message> iterate = newMessages.iterator();
-						while(iterate.hasNext()) {
-							Message currentMessage = iterate.next();
-							try {
-								objectOutputStream.writeObject(currentMessage);
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
-						}
-					}
-					else{
-						System.out.println(String.format("%s has no new messages", this.currentUser.getUsername()));
-					}
-					// wait for a new messages from client
-					Message newMessage = (Message) objectInputStream.readObject();
+
+				// wait for a object from client
+				Object unknownObjectFromClient = objectInputStream.readObject();
+				//check if client gave use a String (asking for chatrooms of that users)
+				if (unknownObjectFromClient instanceof String){
+					String username = (String) unknownObjectFromClient;
+					this.objectOutputStream.writeObject(ServerInfo.getUserChatrooms(username));
+					this.objectOutputStream.flush();
+				} else if (unknownObjectFromClient instanceof Message){
+					Message newMessage = (Message) unknownObjectFromClient;
 					// check if message is a log out message
 					if (newMessage.getType() == msgType.LOGOUT){
-					newMessageThread.interrupt();
-					System.out.println("Logging out");
-					logOut();
-					return;
+						newMessageThread.interrupt();
+						System.out.println("Logging out");
+						logOut();
+						return;
 					}
 					System.out.println(newMessage.toString());
-					//update server and other users of new message - it will send to all users including the user it was sent from
+					//update server and other users of new message - it will send to all users excluding the user it was sent from
 					ServerInfo.updateNewMessage(newMessage);
 				}
-			} catch (SocketException e){
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-			} 
-			// catch (InterruptedException e) {
-			// 	e.printStackTrace();
-			// }
-
+				
+				} catch (SocketException e){
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				} catch (ClassNotFoundException e) {
+					e.printStackTrace();
+				}
 		}
-		
+			
 		public String getIp() {
 			return ip;
 		}
@@ -470,47 +450,12 @@ public class Server {
 		public void setCurrentChatRooms(Vector<ChatRoom> currentChatRooms) {
 			this.currentChatRooms = currentChatRooms;
 		}
-	 
-		public void FirstTimeLogin() {
-			//Sent all messages and chats with this user in it
-			//Step 1: Find the chats with user in it
-			Vector<ChatRoom> userChatroomsFromServer = ServerInfo.getUserChatrooms(this.currentUser.getUsername());
-			//Step 2: Send their file over the network using the dataOutputStream object
-			Iterator<ChatRoom> iterate = userChatroomsFromServer.iterator();
-			while(iterate.hasNext()) {
-				ChatRoom current = iterate.next();
-				String chatRoomFilename = current.getHistoryFile();
-				sendFile(chatRoomFilename);
-			}
-		}
-
-		private void sendFile(String path) {
-			try {
-				File file = new File(path);
-				FileInputStream fileInputStream;
-				fileInputStream = new FileInputStream(file);
-				this.dataOutputStream.writeLong(file.length());
-				int bytes = 0;
-				byte[] buffer = new byte[4096];
-				while ((bytes = fileInputStream.read(buffer)) != -1) {
-				dataOutputStream.write(buffer, 0, bytes);
-				dataOutputStream.flush();
-				}
-				fileInputStream.close();
-				
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
 		
 		public void logOut() {
 			ServerInfo.updateUserStatus(this.currentUser.getUsername());
 			ServerInfo.revoveUserFromQ(currentUser.getUsername());
 		}
-	}
-
+	
 	public static class receiveNewMessageClass implements Runnable {
 		private ObjectOutputStream outTunnel;
 		private User user;
@@ -533,6 +478,7 @@ public class Server {
 						Message currentMessage = iterate.next();
 						try {
 							this.outTunnel.writeObject(currentMessage);
+							this.outTunnel.flush();
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
@@ -553,7 +499,7 @@ public class Server {
 	}
 
 
-
+	}
 }
 
 
