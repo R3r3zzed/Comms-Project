@@ -1,10 +1,5 @@
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Vector;
 import java.util.*;
 import java.io.*;
 
@@ -140,6 +135,23 @@ public class Client {
 			rooms.set(index, c);
 		}
     }
+
+    public Vector<ChatRoom> getLogs(String username){
+        Vector<ChatRoom> userChatRooms = null;
+        try {
+            output.writeObject(username);
+            output.flush();
+            userChatRooms = (Vector<ChatRoom>) this.input.readObject();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return userChatRooms;
+    }
+
+
 
     // public void createChatRoom(String chatroomID){
     //     Vector<User> chatroomUsers = new Vector<User>();
