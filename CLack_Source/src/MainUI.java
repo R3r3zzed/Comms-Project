@@ -68,6 +68,7 @@ public class MainUI implements GUI{
 		// create new chatroom, then open chatroom UI for it
 		createChatRoomButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				System.out.println("Here in ActionPerformed CreateChatRoomBUTTON");	// TODO REMOVE
 				String prompt = "Enter the ids of the user you want to send a message to with '-' as delimiters";
 				prompt += "\ne.g 0-5-10-13";
 				String chatID = JOptionPane.showInputDialog(prompt);
@@ -81,8 +82,7 @@ public class MainUI implements GUI{
 					String userID = strtok.nextToken("-");
 					for(int i = 0; i < client.getDirectory().size(); i++) {
 						User user = client.getDirectory().elementAt(i);
-						if(user.getUserID().compareToIgnoreCase(userID) == 0 
-								&& user.getUserID().compareToIgnoreCase(currentUser.getUserID()) != 0) {
+						if(user.getUserID().compareToIgnoreCase(userID) == 0) {
 							participants.add(user);
 							break;
 						}
@@ -91,7 +91,7 @@ public class MainUI implements GUI{
 				
 				chatID = "";
 				for(int i = 0; i < participants.size(); i++) {
-					chatID += participants.elementAt(i);
+					chatID += participants.elementAt(i).getUserID();
 					if(i != participants.size() - 1) {
 						chatID += "-";
 					}
@@ -104,6 +104,7 @@ public class MainUI implements GUI{
 					return;
 				}
 				
+				System.out.println("In MAINUI: Opening ChatRoom with ID: " + chatID);
 				ChatUI chatUI = new ChatUI(client, client.openChatRoom(chatID), false);
 				chatUI.display();
 			}
@@ -113,6 +114,7 @@ public class MainUI implements GUI{
 		// stop the program
 		logoutButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				client.sendMessageToServer( new Message(currentUser.getUsername(), null, "", msgStatus.SENT, msgType.LOGOUT, ""));
 				close();
 			}
 		});
