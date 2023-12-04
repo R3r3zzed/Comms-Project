@@ -209,7 +209,7 @@ public class Client {
     		System.out.println(participants.get(i).getUserID());
     	}
     	filename += ".log";
-    	return new ChatRoom(chatID, participants, filename);
+    	return new ChatRoom(chatID, participants, new Vector<Message>(), filename);
     }
     
     // Close the connection
