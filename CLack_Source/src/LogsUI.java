@@ -167,8 +167,8 @@ public class LogsUI implements GUI{
 			// Set chatroom button name
 			// name of all the users in the 
 			String participants = "";
+			participants += currentChatRoom.getChatID() + ":";
 			for(int j = 0; j < currentChatRoom.getUsers().size(); j++) {
-				participants += currentChatRoom.getChatID() + ":";
 				participants += currentChatRoom.getUsers().elementAt(j).getName();
 				if(j != currentChatRoom.getUsers().size() - 1) {
 					participants += ", ";
