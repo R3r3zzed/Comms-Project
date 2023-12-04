@@ -173,7 +173,7 @@ public class Client {
     // Try to open the chatRoom that has similar id to CHATID
     public ChatRoom openChatRoom(String chatID) {
     	boolean isFound;	// becomes true if the room with similar ChatID is found
-    	
+    	System.out.println(chatID);
     	for(int i = 0; i < rooms.size(); i++) {
     		isFound = true;
     		ChatRoom currentRoom = rooms.get(i);
@@ -187,6 +187,8 @@ public class Client {
     			}
     		}
     		if (isFound == true) {
+    			System.out.println("ChatID: " + chatID);
+    			System.out.println("currentRoomID: " + chatID);
     			return currentRoom;
     		}
     	}
@@ -197,7 +199,16 @@ public class Client {
     		}
     	}
     	
-    	String filename = chatID + ".log";
+    	// generate filename
+    	String filename = "";
+    	for(int i = 0; i < participants.size(); i++) {
+    		filename += participants.get(i).getUsername();
+    		if(i != participants.size() - 1) {
+    			filename += "-";
+    		}
+    		System.out.println(participants.get(i).getUserID());
+    	}
+    	filename += ".log";
     	return new ChatRoom(chatID, participants, filename);
     }
     
