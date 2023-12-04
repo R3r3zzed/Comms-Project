@@ -1,0 +1,5 @@
+Madison;;;madison;;;letmein;;;Basic
+Sean;;;sean;;;password;;;Basic
+David;;;david;;;anotherpassword;;;Basic
+Joseph;;;joseph;;;password123;;;Basic
+Sedat;;;sedat;;;goodpassword;;;Baisc

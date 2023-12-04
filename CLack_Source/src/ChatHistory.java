@@ -1,5 +1,3 @@
-package Implementation;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
@@ -30,7 +28,7 @@ public class ChatHistory {
 
 	}
 
-	public Message[] loadChatRoomFiles() {
+	public Vector<Message> loadChatRoomFiles() {
 		Vector<Message> messageVector = new Vector<>();
 		SimpleDateFormat formatter = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy"); // Adjust this format to
 																							// match the one used in
@@ -66,7 +64,7 @@ public class ChatHistory {
 		}
 
 		// Convert the Vector to an array and return it
-		return messageVector.toArray(new Message[0]);
+		return messageVector;
 	}
 
 	private void setChatHistoryFile(String newFile) {
