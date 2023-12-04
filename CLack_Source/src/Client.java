@@ -1,4 +1,7 @@
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketAddress;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.*;
 import java.io.*;
@@ -14,18 +17,48 @@ public class Client {
     private Vector<User> directory;
     private Vector<ChatRoom> rooms;
 
-    public static void main(String args[]) {
+
+    public static void main(String args[]) throws UnknownHostException {
         Socket s;
+        String ip = "0.0.0.0";
+        int port = 42; 
+        BufferedReader br;
+        try { 
+            br = new BufferedReader(new FileReader("./ipFile.txt"));
+            ip = br.readLine();
+            port = Integer.parseInt(br.readLine());
+            br.close();
+        } catch (IOException | NumberFormatException e) {
+            System.out.println("Error with file");
+        }
+
+        while(true){
         try {
-            s = new Socket("localhost", 1235);
+            s = new Socket(ip, port);
+            OutputStream outputStream = s.getOutputStream();
             Client client = new Client(s);
             LoginUI loginScreen = new LoginUI(client);
             loginScreen.display();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
+            break;
         } catch (IOException e) {
-            e.printStackTrace();
+            Scanner sc = new Scanner(System.in);
+            System.out.println("Oops! Default IP and Port Didn't work...Please provide new ones.");
+            System.out.print("IP: ");
+            ip = sc.nextLine();
+            System.out.print("Port: ");
+            port = sc.nextInt();
+            sc.close();
+            try {
+                FileWriter myWriter = new FileWriter("./ipFile.txt");
+                myWriter.write(ip+"\n");
+                myWriter.write(port+"\n");
+                myWriter.close();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+
         }
+    }
     }
 
     public Client(Socket s) {
