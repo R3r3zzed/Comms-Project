@@ -16,6 +16,7 @@ public class Client {
     private User currentUser;
     private Vector<User> directory;
     private Vector<ChatRoom> rooms;
+    private MainUI mainUI;
 
 
     public static void main(String args[]) throws UnknownHostException {
@@ -242,6 +243,9 @@ public class Client {
     	return new ChatRoom(chatID, participants, new Vector<Message>(), filename);
     }
     
+    public void setMain(MainUI mainUI) {
+    	this.mainUI = mainUI;
+    }
     // Close the connection
     public void close() {
         try {
