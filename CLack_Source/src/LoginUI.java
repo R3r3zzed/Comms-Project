@@ -53,7 +53,6 @@ public class LoginUI implements GUI {
 		frame.getContentPane().add(panel);
 		frame.setSize(480, 360);
 		frame.setLocale(null);
-		System.out.println("Setting visible");
 		frame.setVisible(true);
 	}
 	
@@ -64,7 +63,6 @@ public class LoginUI implements GUI {
 			public void actionPerformed(ActionEvent e) {
 				username = usernameInput.getText();
 				password = passwordInput.getText();
-				System.out.println("username: " + username + "\npassword: " + password);
 				
 				isLoggedIn = client.login(username, password);
 				
