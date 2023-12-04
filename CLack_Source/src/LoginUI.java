@@ -65,7 +65,7 @@ public class LoginUI implements GUI {
 				password = passwordInput.getText();
 				System.out.println("username: " + username + "\npassword: " + password);
 				
-				isLoggedIn = client.login(username, password);							/* ADD THIS METHOD IN Client class*/
+				isLoggedIn = client.login(username, password);
 				
 				if(isLoggedIn) {
 					JOptionPane.showMessageDialog(null, "Successfully logged in. Opening...");

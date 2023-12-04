@@ -57,7 +57,7 @@ public class ChatUI implements GUI {
 				JOptionPane.showMessageDialog(frame, sendMessageTextArea.getText());
 				Message message = new Message(client.getCurrentUser().getUsername(), new Date(),
 						chatRoom.getChatID(), msgStatus.SENT, msgType.TEXT, sendMessageTextArea.getText());
-				client.updateMessage(message);	// TODO uncomment for final. ChatRoom.sendMessage needs to be implemented
+				client.updateMessage(message);
 				sendMessageTextArea.setText("");
 			}
 		});

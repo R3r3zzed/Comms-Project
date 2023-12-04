@@ -66,13 +66,37 @@ public class MainUI implements GUI{
 		
 		
 		// create new chatroom, then open chatroom UI for it
-		// TODO 1 client.openChatRoom needs to take in a string that represents chatUID
-		// TODO 2 openChatRoom needs to parse the string and check if the chatroom already exists. Otherwise it creates
-		// TODO 3 a new one and returns that chatRoom
 		createChatRoomButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String chatUID = "Fix";
-				ChatUI chatUI = new ChatUI(client, client.openChatRoom(chatUID), false);
+				String prompt = "Enter the ids of the user you want to send a message to with '-' as delimiters";
+				prompt += "\ne.g 0-5-10-13";
+				String chatID = JOptionPane.showInputDialog(prompt);
+				chatID = chatID.trim();		// remove all whitespace
+				
+				Vector<User> participants = new Vector<User>();
+				
+				// parse the input
+				StringTokenizer strtok = new StringTokenizer(chatID);
+				while (strtok.hasMoreTokens()) {
+					String userID = strtok.nextToken("-");
+					for(int i = 0; i < client.getDirectory().size(); i++) {
+						User user = client.getDirectory().elementAt(i);
+						if(user.getUserID().compareToIgnoreCase(userID) == 0 
+								&& user.getUserID().compareToIgnoreCase(currentUser.getUserID()) != 0) {
+							participants.add(user);
+							break;
+						}
+					}
+				}
+				// Check if any user was selected
+				// if vector is empty don't create a chatroom and display error message
+				if (participants.size() == 0) {
+					String errorMessage = "Follow the format or make sure that at least one of the user ID is valid";
+					JOptionPane.showMessageDialog(panel, errorMessage);
+					return;
+				}
+				
+				ChatUI chatUI = new ChatUI(client, client.openChatRoom(chatID), false);
 				chatUI.display();
 			}
 		});
