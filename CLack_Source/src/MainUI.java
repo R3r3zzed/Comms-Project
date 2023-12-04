@@ -88,6 +88,14 @@ public class MainUI implements GUI{
 						}
 					}
 				}
+				
+				chatID = "";
+				for(int i = 0; i < participants.size(); i++) {
+					chatID += participants.elementAt(i);
+					if(i != participants.size() - 1) {
+						chatID += "-";
+					}
+				}
 				// Check if any user was selected
 				// if vector is empty don't create a chatroom and display error message
 				if (participants.size() == 0) {
@@ -268,7 +276,7 @@ public class MainUI implements GUI{
 					JButton eventSource = (JButton) e.getSource();
 					StringTokenizer strtok = new StringTokenizer(eventSource.getText());
 					String id = strtok.nextToken(":");
-					ChatUI chatUI = new ChatUI(client, client.openChatRoom(id), false);	// TODO needs to be implemented on client side
+					ChatUI chatUI = new ChatUI(client, client.openChatRoom(id), false);
 					chatUI.display();
 				}
 			});
