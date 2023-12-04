@@ -26,7 +26,6 @@ public class Server {
 			terminalLogger.log(Level.INFO, "Server is starting");
 			server = new ServerSocket(1235);
 			server.setReuseAddress(true);
-
 			while (true) {
 				Socket client = server.accept();
 				ServerHandler clientSock = new ServerHandler(client);
@@ -217,6 +216,7 @@ public class Server {
 			int index = chatrooms.indexOf(foundChatroom);
 			ChatRoom c = chatrooms.get(index);
 			c.addMessage(m);
+			c.writeToFile(m);
 			chatrooms.set(index, c);
 			chatroomUsers = c.getUsers();
 		}
@@ -229,6 +229,7 @@ public class Server {
 			}
 			ChatRoom newChatroom = new ChatRoom(chatroomID, chatroomUsers, new Vector<Message>(), this.logPathString+"/"+chatroomID+".log" );
 			newChatroom.addMessage(m);
+			newChatroom.writeToFile(m);
 			chatrooms.add(newChatroom);
 		}
 
@@ -355,6 +356,7 @@ public class Server {
 
 				//Who is logging on
 				Boolean ValidUser = false;
+				System.out.println("A connection was made");
 
 				while(! ValidUser){
 					//first read from client
@@ -433,7 +435,15 @@ public class Server {
 				} catch (SocketException e){
 					e.printStackTrace();
 				} catch (IOException e) {
-					e.printStackTrace();
+					System.out.println("User exited without logging out");
+					try{
+					if (this.ServerInfo.getUser(this.currentUser.getUsername()).getUserStatus() == UserStatus.ONLINE){
+						System.out.println("User is still showing online");
+						this.ServerInfo.updateUserStatus(this.currentUser.getUsername());
+					}
+					} catch (NullPointerException n){
+						System.out.println("No users were entered for this thread");
+					}
 				} catch (ClassNotFoundException e) {
 					e.printStackTrace();
 				}
@@ -468,6 +478,9 @@ public class Server {
 		
 		public void run(){
 			while(!Thread.interrupted()){
+				if (ServerHandler.ServerInfo.getUser(this.user.getUsername()).getUserStatus() == UserStatus.OFFLINE ){
+					return;
+				}
 				//check to see if there are new messages for User
 				Vector<Message> newMessages = ServerHandler.ServerInfo.grabFromNewMessageQ(this.user.getUsername());
 				if (newMessages != null){
