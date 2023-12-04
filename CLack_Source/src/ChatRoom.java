@@ -1,7 +1,8 @@
+import java.io.Serializable;
 import java.util.Vector;
 
 
-public class ChatRoom {
+public class ChatRoom implements Serializable{
 	private String chatID;
 	private ChatHistory history;
 	private Vector<Message> roomMessages;

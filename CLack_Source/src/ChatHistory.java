@@ -4,12 +4,13 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Vector;
 
-public class ChatHistory {
+public class ChatHistory implements Serializable{
 	private String chatRoomFilename;
 
 	public ChatHistory(String newChatroomFileName) {
