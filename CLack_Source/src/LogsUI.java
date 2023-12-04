@@ -11,7 +11,7 @@ import java.util.Vector;
 
 
 public class LogsUI implements GUI{
-	private ClientFake client;
+	private Client client;
 	private JFrame frame;
 	private JPanel panel;
 	private User selectedUser;
@@ -29,9 +29,7 @@ public class LogsUI implements GUI{
 	
 	private JLabel userLabel;
 	
-	private ChatUI chatUI;
-	
-	public LogsUI(ClientFake client) {
+	public LogsUI(Client client) {
 		this.client = client;
 		selectedUser = client.getCurrentUser();
 		chatRooms = client.getChatRooms();
@@ -54,16 +52,6 @@ public class LogsUI implements GUI{
 		doFilterChatScrollPane(null);
 		doFilterDirectoryScrollPane(null);
 		placePanelComponents();
-		
-		// TODO needs to be implemented on client side
-		/*
-		// create new chatroom, then open chatroom UI for it
-		createChatRoomButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				client.createChatRoom()
-			}
-		});
-		*/
 		
 		// filter directory based on filter input by user
 		filterDirectorySubmitButton.addActionListener(new ActionListener() {
@@ -168,9 +156,8 @@ public class LogsUI implements GUI{
 		scrollPanel.setLayout(new GridBagLayout());
 		GridBagConstraints constraints = new GridBagConstraints();
 		
-		/*TODO waiting for client side implementation 
-		for(int i = 0; i < client.getChatRooms().size(); i++) {
-			ChatRoom currentChatRoom = client.getChatRooms().elementAt(i);
+		for(int i = 0; i < chatRooms.size(); i++) {
+			ChatRoom currentChatRoom = chatRooms.elementAt(i);
 			constraints.fill = GridBagConstraints.BOTH;
 			constraints.weightx = 0.5;
 			constraints.weighty = 0.5;
@@ -181,8 +168,9 @@ public class LogsUI implements GUI{
 			// name of all the users in the 
 			String participants = "";
 			for(int j = 0; j < currentChatRoom.getUsers().size(); j++) {
-				participants += currentChatRoom.getUsers().getName();
-				if(j == currentChatRoom.getUsers().size() - 1) {
+				participants += currentChatRoom.getChatID() + ":";
+				participants += currentChatRoom.getUsers().elementAt(j).getName();
+				if(j != currentChatRoom.getUsers().size() - 1) {
 					participants += ", ";
 				}
 			}
@@ -190,25 +178,12 @@ public class LogsUI implements GUI{
 			chatRoomButtons.elementAt(i).setPreferredSize(new Dimension(directoryScrollPane.getWidth(),frame.getHeight()/10));
 			scrollPanel.add(chatRoomButtons.elementAt(i), constraints);
 		}
-		*/
 		
-		// TODO Remove for final
-		for(int i = 0; i < 10; i++) {
-			constraints.fill = GridBagConstraints.BOTH;
-			constraints.weightx = 0.5;
-			constraints.weighty = 0.5;
-			constraints.gridy = i;
-			constraints.gridx = 0;
-			chatRoomButtons.add(new JButton("Button: " + i));
-			chatRoomButtons.elementAt(i).setPreferredSize(new Dimension(directoryScrollPane.getWidth(),frame.getHeight()/10));
-			scrollPanel.add(chatRoomButtons.elementAt(i), constraints);
-		}
-		
-		// TODO implement way to open chatRoom using CHATUID
 		for(int i = 0; i < chatRoomButtons.size(); i++) {
 			chatRoomButtons.get(i).addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					// openChatRoom( UID ));
+					ChatUI chatUI = new ChatUI(client, client.openChatRoom(id), true);	// TODO needs to be implemented on client side
+					chatUI.display();
 				}
 			});
 		}
@@ -222,29 +197,15 @@ public class LogsUI implements GUI{
 			filter = "";
 		}
 		
-		/* TODO Wait for Chatroom to implemented then uncomment
 		// look through list of participants. If any of the users' name contains substring filter then make JButton visible for it
-		for(int i = 0; i < client.getChatRooms().size();i++) {
-			Vector<User> participants = client.getChatRooms().elementAt(i).getParticipants();		// TODO Needs to be implemented
-			for(int j = 0; j < participants.size(); j++) {
-				if(participants.elementAt(i).getName().contains(filter)) {
+		for(int i = 0; i < chatRoomButtons.size();i++) {
+			String participants =  chatRoomButtons.elementAt(i).getText();
+				if(participants.contains(filter)) {
 					chatRoomButtons.elementAt(i).setVisible(true);
 				}
 				else {
 					chatRoomButtons.elementAt(i).setVisible(false);
 				}
-			}
-		}
-		*/
-		
-		// TODO remove for final
-		for(int i = 0; i < chatRoomButtons.size(); i++) {
-			if (chatRoomButtons.elementAt(i).getText().toUpperCase().contains(filter.toUpperCase())) {
-				chatRoomButtons.elementAt(i).setVisible(true);
-			}
-			else {
-				chatRoomButtons.elementAt(i).setVisible(false);
-			}
 		}
 		
 		chatScrollPane.updateUI();
@@ -274,7 +235,6 @@ public class LogsUI implements GUI{
 			// if yes. Then load up the chatrooms for selected user
 			directoryButtons.elementAt(i).addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					// TODO implement actual functionality
 					String label = ((JButton) e.getSource()).getText();
 					int isConfirmed = JOptionPane.showConfirmDialog(scrollPanel, "Get logs for " + label + "?");
 					if (isConfirmed != 0) {
@@ -284,15 +244,22 @@ public class LogsUI implements GUI{
 					// get the user ID from the label
 					StringTokenizer strtok = new StringTokenizer(label);
 					String id = strtok.nextToken(":");
-					User newSelectedUser = client.getDirectory().get(Integer.parseInt(id));
+					User newSelectedUser = null;
+					for(int i = 0; i < client.getDirectory().size(); i++) {
+						if (client.getDirectory().elementAt(i).getUserID().compareToIgnoreCase(id) == 0) {
+							newSelectedUser = client.getDirectory().elementAt(i);
+						}
+					}
+					
 					if (newSelectedUser == selectedUser) {
 						return;	// user already selected
 					}
+					
 					selectedUser = newSelectedUser;
 					userLabel.setText(selectedUser.getName());
+					chatRooms = client.getLogs(selectedUser.getUsername());
+					createChatButtons();
 					panel.updateUI();
-					// TODO remove everything in this block below this
-					System.out.println("Confirmed " + ((JButton) e.getSource()).getText());
 				}
 			});
 		}
