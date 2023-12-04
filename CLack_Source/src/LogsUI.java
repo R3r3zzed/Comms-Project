@@ -186,7 +186,7 @@ public class LogsUI implements GUI{
 					JButton eventSource = (JButton) e.getSource();
 					StringTokenizer strtok = new StringTokenizer(eventSource.getText());
 					String id = strtok.nextToken(":");
-					ChatUI chatUI = new ChatUI(client, client.openChatRoom(id), false);	// TODO needs to be implemented on client side
+					ChatUI chatUI = new ChatUI(client, client.openChatRoom(id), true);	// TODO needs to be implemented on client side
 					chatUI.display();
 				}
 			});
