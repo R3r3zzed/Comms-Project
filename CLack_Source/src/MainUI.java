@@ -251,6 +251,7 @@ public class MainUI implements GUI{
 	
 	// create JButtons for each chatroom
 	private void createChatButtons() {
+		chatRoomButtons.clear();
 		JPanel scrollPanel = new JPanel();
 		scrollPanel.setLayout(new GridBagLayout());
 		GridBagConstraints constraints = new GridBagConstraints();
@@ -317,6 +318,7 @@ public class MainUI implements GUI{
 	// create the Labels for each user in directory
 	// displays the name of the user;
 	private void createDirectoryLabels() {
+		directoryLabels.clear();
 		JPanel scrollPanel = new JPanel();
 		scrollPanel.setLayout(new GridBagLayout());
 		GridBagConstraints constraints = new GridBagConstraints();
@@ -357,6 +359,8 @@ public class MainUI implements GUI{
 	
 	public void updateChatScrollPane() {
 		createChatButtons();
+		panel.removeAll();
+		placePanelComponents();
 		panel.updateUI();
 	}
 	

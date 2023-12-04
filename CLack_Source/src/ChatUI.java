@@ -154,6 +154,8 @@ public class ChatUI implements GUI {
 	public void updateMessagesScrollPane() {
 		messagePanel.removeAll();
 		createMessagesScrollPaneComponents();
+		panel.removeAll();
+		placePanelComponents();
 		panel.updateUI();
 	}
 	
@@ -181,6 +183,8 @@ public class ChatUI implements GUI {
 	public void updateParticipantScrollPane() {
 		participantPanel.removeAll();
 		createParticipantScrollPaneComponents();
+		panel.removeAll();
+		placePanelComponents();
 		panel.updateUI();
 	}
 }

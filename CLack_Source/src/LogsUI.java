@@ -152,6 +152,7 @@ public class LogsUI implements GUI{
 	
 	// create JButtons for each chatroom
 	private void createChatButtons() {
+		chatRoomButtons.clear();
 		JPanel scrollPanel = new JPanel();
 		scrollPanel.setLayout(new GridBagLayout());
 		GridBagConstraints constraints = new GridBagConstraints();
@@ -217,6 +218,7 @@ public class LogsUI implements GUI{
 	// create the Labels for each user in directory
 	// displays the name of the user;
 	private void createDirectoryButtons() {
+		directoryButtons.clear();
 		JPanel scrollPanel = new JPanel();
 		scrollPanel.setLayout(new GridBagLayout());
 		GridBagConstraints constraints = new GridBagConstraints();
@@ -263,6 +265,8 @@ public class LogsUI implements GUI{
 					userLabel.setText(selectedUser.getName());
 					chatRooms = client.getLogs(selectedUser.getUsername());
 					createChatButtons();
+					panel.removeAll();
+					placePanelComponents();
 					panel.updateUI();
 				}
 			});
