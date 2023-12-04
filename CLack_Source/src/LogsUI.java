@@ -182,7 +182,10 @@ public class LogsUI implements GUI{
 		for(int i = 0; i < chatRoomButtons.size(); i++) {
 			chatRoomButtons.get(i).addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					ChatUI chatUI = new ChatUI(client, client.openChatRoom(id), true);	// TODO needs to be implemented on client side
+					JButton eventSource = (JButton) e.getSource();
+					StringTokenizer strtok = new StringTokenizer(eventSource.getText());
+					String id = strtok.nextToken(":");
+					ChatUI chatUI = new ChatUI(client, client.openChatRoom(id), false);	// TODO needs to be implemented on client side
 					chatUI.display();
 				}
 			});
@@ -248,6 +251,7 @@ public class LogsUI implements GUI{
 					for(int i = 0; i < client.getDirectory().size(); i++) {
 						if (client.getDirectory().elementAt(i).getUserID().compareToIgnoreCase(id) == 0) {
 							newSelectedUser = client.getDirectory().elementAt(i);
+							break;
 						}
 					}
 					
