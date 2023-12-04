@@ -170,6 +170,37 @@ public class Client {
         return rooms;
     }
     
+    // Try to open the chatRoom that has similar id to CHATID
+    public ChatRoom openChatRoom(String chatID) {
+    	boolean isFound;	// becomes true if the room with similar ChatID is found
+    	
+    	for(int i = 0; i < rooms.size(); i++) {
+    		isFound = true;
+    		ChatRoom currentRoom = rooms.get(i);
+    		String currentRoomID = currentRoom.getChatID();
+    		StringTokenizer tokenizer = new StringTokenizer(currentRoomID);
+    		while(tokenizer.hasMoreTokens()) {
+    			String userID = tokenizer.nextToken();
+    			if(!chatID.contains(userID)) {
+    				isFound = false;
+    				break;
+    			}
+    		}
+    		if (isFound == true) {
+    			return currentRoom;
+    		}
+    	}
+    	Vector<User> participants = new Vector<User>();
+    	for(int i = 0; i < directory.size(); i++) {
+    		if(chatID.contains(directory.get(i).getUserID())) {
+    			participants.add(directory.get(i));
+    		}
+    	}
+    	
+    	String filename = chatID + ".log";
+    	return new ChatRoom(chatID, participants, filename);
+    }
+    
     // Close the connection
     public void close() {
         try {
