@@ -1,17 +1,18 @@
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.*;
-
+import org.junit.jupiter.api.RepeatedTest;
+//import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import java.util.Date;
 import java.util.Vector;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 
-class testServer {
+public class testServer {
 	Server normalServer = null;
 	@BeforeEach
-	void loadDefaultServer(){
+	public void loadDefaultServer(){
 		this.normalServer = new Server();
 		//Userlist must be defined before the chatroom can be loaded in
 
@@ -20,14 +21,14 @@ class testServer {
 	}
 
 	@Test 
-	void testUsers(){
+	public void testUsers(){
 		Server nofileServer = new Server("notareallyfile.txt", "nologs" );
 		// assertEquals(6, this.normalServer.getListUsers().size()); // the number of users in the directory.txt file is 5
 		assertNull(nofileServer.getListUsers());
 	}
 
 	@Test 
-	void testGetChatrooms () {
+	public void testGetChatrooms () {
 		Server nofileServer = new Server("notareallyfile.txt", "nologs" );
 		Vector<ChatRoom> chatroom = this.normalServer.getChatrooms();
 		assertEquals(1, chatroom.size() );
@@ -35,14 +36,14 @@ class testServer {
 		assertNull(nofileServer.getChatrooms());
 	}
 	@Test 
-	void testCheckIT(){
+	public void testCheckIT(){
 		User madison = this.normalServer.getListUsers().firstElement();
 		User root = this.normalServer.getListUsers().lastElement();
 		assertFalse(this.normalServer.isITUser(madison));
 		assertTrue(this.normalServer.isITUser(root));
 	}
 	@Test 
-	void testUserAuthentication(){
+	public void testUserAuthentication(){
 		String[] realUser = "madison;;;password".split(";;;");
 
 		String[] fakeUser = "not;;;real".split(";;;");
@@ -51,13 +52,13 @@ class testServer {
 		assertFalse(this.normalServer.UserAuthentication(fakeUser[0], fakeUser[1]));
 	}
 	@Test 
-	void testGetUserFromServer(){
+	public void testGetUserFromServer(){
 		assertTrue(this.normalServer.getUser("madison") instanceof User);
 		assertNull(this.normalServer.getUser("not a really user"));
 	}
 
 	@Test 
-	void testNewMessage(){
+	public void testNewMessage(){
 		String sender = "madison";
 		Message existingChatRoom = new Message(sender, new Date(), "madison-sean-david-sedat-joseph", msgStatus.SENT, msgType.TEXT, "message from existingChatRoom");
 		Message newChatRoom = new Message(sender, new Date(), "madison-root", msgStatus.SENT, msgType.TEXT, "message from existingChatRoom");
@@ -76,7 +77,7 @@ class testServer {
 		// assertNull(this.normalServer.getUser(fakeUser[0], fakeUser[1]));
 	}
 	@Test 
-	void testUpdateUserStatus(){
+	public void testUpdateUserStatus(){
 		//real user
 		this.normalServer.updateUserStatus("madison"); //make user online
 		User madison = this.normalServer.getUser("madison");
@@ -87,7 +88,7 @@ class testServer {
 	}
 
 	@Test
-	void testMessageQ(){
+	public void testMessageQ(){
 		this.normalServer.setUpUserQ("madison");
 		this.normalServer.setUpUserQ("root");
 		this.normalServer.updateUserStatus("madison"); //madison online
