@@ -1,4 +1,3 @@
-package Implementation;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,7 +15,7 @@ public class ChatRoomTest {
 	@BeforeEach
 	public void setUp() {
 		users = new Vector<>();
-		testUser = new User("User Name", "user1", "password", UserType.REGULAR); // Adjust as needed
+		testUser = new User("User Name", "user1", "password", UserType.BASIC); // Adjust as needed
 		users.add(testUser);
 		chatRoom = new ChatRoom(chatRoomID, users, testFileName);
 	}
@@ -44,7 +43,6 @@ public class ChatRoomTest {
 	public void testChatRoomConstructor() {
 		assertNotNull(chatRoom.getHistory(), "History should not be null after initialization");
 		assertEquals(chatRoomID, chatRoom.getChatID(), "Chat ID should match the one provided at initialization");
-		// Add more assertions for other properties
 	}
 
 	@Test
