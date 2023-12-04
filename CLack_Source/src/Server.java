@@ -414,7 +414,7 @@ public class Server {
 				receiveNewMessageClass newMessageClass = new receiveNewMessageClass(this.currentUser, objectOutputStream);
 				Thread newMessageThread = new Thread(newMessageClass);
 				newMessageThread.start();
-
+				while(true){
 				// wait for a object from client
 				Object unknownObjectFromClient = objectInputStream.readObject();
 				//check if client gave use a String (asking for chatrooms of that users)
@@ -435,8 +435,9 @@ public class Server {
 					//update server and other users of new message - it will send to all users excluding the user it was sent from
 					ServerInfo.updateNewMessage(newMessage);
 				}
+				}
 				
-				} catch (SocketException e){
+				} catch (SocketException | ClassNotFoundException e ){
 					e.printStackTrace();
 				} catch (IOException e) {
 					System.out.println("User exited without logging out");
@@ -448,9 +449,7 @@ public class Server {
 					} catch (NullPointerException n){
 						System.out.println("No users were entered for this thread");
 					}
-				} catch (ClassNotFoundException e) {
-					e.printStackTrace();
-				}
+				} 			
 		}
 			
 		public String getIp() {
