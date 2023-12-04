@@ -70,6 +70,7 @@ public class LoginUI implements GUI {
 					JOptionPane.showMessageDialog(null, "Successfully logged in. Opening...");
 					mainUI = new MainUI(client);
 					mainUI.display();
+					client.setMainUI(mainUI);
 					frame.setVisible(false);
 					frame.dispose();
 				}
@@ -105,9 +106,5 @@ public class LoginUI implements GUI {
 		constraints.gridy = 2;
 		constraints.gridwidth = 2;
 		panel.add(submitButton, constraints);
-	}
-	
-	public MainUI getMainUI() {
-		return mainUI;
 	}
 }
