@@ -24,7 +24,6 @@ public class ChatRoom implements Serializable{
 
 	public void addMessage(Message m){
 		roomMessages.add(m);
-		writeToFile(m);
 	}
 
 	//getters	
