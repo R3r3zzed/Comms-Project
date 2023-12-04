@@ -23,7 +23,7 @@ public class Client {
         Socket s;
         try {
             s = new Socket("localhost", 1235);
-            ClientFake client = new ClientFake(s);
+            Client client = new Client(s);
             LoginUI loginScreen = new LoginUI(client);
             loginScreen.display();
         } catch (UnknownHostException e) {
@@ -46,7 +46,6 @@ public class Client {
             e.printStackTrace();
         } 
     }
-		
 
     public boolean login(String username, String password) {
         try {
@@ -85,6 +84,15 @@ public class Client {
         } 
         
     }
+
+    public void updateMessage(Message m){
+        //update chatroom 
+        String chatroom = m.getChatroomID();
+
+        //send to the server
+        // loadChatRoom(m);
+
+    } 
     
     public Vector<User> getDirectory(){
         return directory;
@@ -98,15 +106,6 @@ public class Client {
         return currentUser;
     }
     
-    // Requests chat logs from the server
-    public void requestLogs(String username) {
-        try {
-            this.output.writeObject("LOG_REQUEST: " + username);
-            this.output.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     // Opens a chat room
     public void openChatRoom(String id){
@@ -118,15 +117,6 @@ public class Client {
         }
     }
 
-    // Loads messages from a chat room
-    public void loadChatRoom(String id) {
-        try {
-            this.output.writeObject("LOAD_CHAT: " + id);
-            this.output.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     // Sends a message to the server
     public void sendMessageToServer(String message) {
@@ -137,15 +127,13 @@ public class Client {
             e.printStackTrace();
         }
     }
-    
+
     public void updateDirectory(Vector<User> updatedDirectory) {
         this.directory = updatedDirectory;
     }
     
     public void updateChatRoom(String chatRoomId) {
         try {
-            this.output.writeObject("UPDATE_CHATROOM: " + chatRoomId);
-            this.output.flush();
             
             if (this.input.readObject() instanceof ChatRoom) {
                 ChatRoom updatedRoom = (ChatRoom) this.input.readObject();
