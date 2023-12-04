@@ -78,38 +78,56 @@ public class MainUI implements GUI{
 				
 				// parse the input
 				StringTokenizer strtok = new StringTokenizer(chatID);
+				boolean isCurrentUserAdded = false;
+				
 				while (strtok.hasMoreTokens()) {
 					String userID = strtok.nextToken("-");
-					for(int i = 0; i < client.getDirectory().size(); i++) {
-						User user = client.getDirectory().elementAt(i);
-						if(user.getUserID().compareToIgnoreCase(userID) == 0
-								&& (user.getUserID().compareToIgnoreCase(currentUser.getUserID()) != 0)) {
-							participants.add(user);
-							break;
+					int otherID = -1;
+					try {
+						otherID = Integer.parseInt(userID);
+						if(otherID == Integer.parseInt(currentUser.getUserID())) {
+							participants.add(currentUser);
+							isCurrentUserAdded = true;
+							continue;
 						}
-						if(user == currentUser) {
-							participants.add(user);
+						if(isCurrentUserAdded == false && otherID > Integer.parseInt(currentUser.getUserID())) {
+							participants.add(currentUser);
+							isCurrentUserAdded = true;
 						}
+						participants.add(client.getDirectory().get(otherID));
 					}
-				}
-				
-				if(participants.get(participants.size() - 1).getUserID().compareTo(chatID) > 0) {
-					participants.add(currentUser);
+					catch(NumberFormatException exc) {
+						String errorMessage = "Your input must only be valid user IDs: e.g. 1-5-10-2";
+						errorMessage += "\n" + userID + " is not a valid user's ID";
+						JOptionPane.showMessageDialog(panel, errorMessage);
+						return;
+					}
+					catch(ArrayIndexOutOfBoundsException exc) {
+						String errorMessage = "Your input must only be valid user IDs: e.g. 1-5-10-2";
+						errorMessage += "\n" + Integer.toString(otherID) + " is not a valid user's ID";
+						JOptionPane.showMessageDialog(panel, errorMessage);
+						return;
+					}
 				}
 
-				chatID = "";
-				for(int i = 0; i < participants.size(); i++) {
-					chatID += participants.elementAt(i).getUserID();
-					if(i != participants.size() - 1) {
-						chatID += "-";
-					}
+				if (isCurrentUserAdded == false) {
+					participants.add(currentUser);
 				}
+				
 				// Check if any user was selected
 				// if vector is empty don't create a chatroom and display error message
 				if (participants.size() <= 1) {
 					String errorMessage = "Follow the format or make sure that at least one of the user ID is valid";
 					JOptionPane.showMessageDialog(panel, errorMessage);
 					return;
+				}
+				
+				chatID = "";
+				for(int i = 0; i < participants.size(); i++) {
+					chatID += participants.elementAt(i).getUserID();
+					if(i != participants.size() - 1) {
+						chatID += "-";
+					}
 				}
 				
 				chatUI = new ChatUI(client, client.openChatRoom(chatID), false);
