@@ -183,6 +183,7 @@ public class LogsUI implements GUI{
 			chatRoomButtons.get(i).addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					ChatUI chatUI = new ChatUI(client, client.openChatRoom(id), true);	// TODO needs to be implemented on client side
+					chatUI.display();
 				}
 			});
 		}
@@ -196,29 +197,15 @@ public class LogsUI implements GUI{
 			filter = "";
 		}
 		
-		/* TODO Wait for Chatroom to implemented then uncomment
 		// look through list of participants. If any of the users' name contains substring filter then make JButton visible for it
-		for(int i = 0; i < client.getChatRooms().size();i++) {
-			Vector<User> participants = client.getChatRooms().elementAt(i).getParticipants();		// TODO Needs to be implemented
-			for(int j = 0; j < participants.size(); j++) {
-				if(participants.elementAt(i).getName().contains(filter)) {
+		for(int i = 0; i < chatRoomButtons.size();i++) {
+			String participants =  chatRoomButtons.elementAt(i).getText();
+				if(participants.contains(filter)) {
 					chatRoomButtons.elementAt(i).setVisible(true);
 				}
 				else {
 					chatRoomButtons.elementAt(i).setVisible(false);
 				}
-			}
-		}
-		*/
-		
-		// TODO remove for final
-		for(int i = 0; i < chatRoomButtons.size(); i++) {
-			if (chatRoomButtons.elementAt(i).getText().toUpperCase().contains(filter.toUpperCase())) {
-				chatRoomButtons.elementAt(i).setVisible(true);
-			}
-			else {
-				chatRoomButtons.elementAt(i).setVisible(false);
-			}
 		}
 		
 		chatScrollPane.updateUI();
@@ -248,7 +235,6 @@ public class LogsUI implements GUI{
 			// if yes. Then load up the chatrooms for selected user
 			directoryButtons.elementAt(i).addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					// TODO implement actual functionality
 					String label = ((JButton) e.getSource()).getText();
 					int isConfirmed = JOptionPane.showConfirmDialog(scrollPanel, "Get logs for " + label + "?");
 					if (isConfirmed != 0) {
@@ -258,15 +244,22 @@ public class LogsUI implements GUI{
 					// get the user ID from the label
 					StringTokenizer strtok = new StringTokenizer(label);
 					String id = strtok.nextToken(":");
-					User newSelectedUser = client.getDirectory().get(Integer.parseInt(id));
+					User newSelectedUser = null;
+					for(int i = 0; i < client.getDirectory().size(); i++) {
+						if (client.getDirectory().elementAt(i).getUserID().compareToIgnoreCase(id) == 0) {
+							newSelectedUser = client.getDirectory().elementAt(i);
+						}
+					}
+					
 					if (newSelectedUser == selectedUser) {
 						return;	// user already selected
 					}
+					
 					selectedUser = newSelectedUser;
 					userLabel.setText(selectedUser.getName());
+					chatRooms = client.getLogs(selectedUser.getUsername());
+					createChatButtons();
 					panel.updateUI();
-					// TODO remove everything in this block below this
-					System.out.println("Confirmed " + ((JButton) e.getSource()).getText());
 				}
 			});
 		}
