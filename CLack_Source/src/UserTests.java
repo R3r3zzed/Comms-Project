@@ -1,8 +1,10 @@
-
+import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.RepeatedTest;
+//import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
-class UserTests {
+public class UserTests {
 	 @Test
 	 public void testGenerateID() {
 		 String id1 = User.generateID();
@@ -28,7 +30,7 @@ class UserTests {
 	 }
 
     @Test
-    void testGetters() {
+    public void testGetters() {
         // Test getter methods
         User user = new User("John Doe", "john.doe", "password123", UserType.BASIC);
 
@@ -40,7 +42,7 @@ class UserTests {
     }
 
     @Test
-    void testChangeStatus() {
+    public void testChangeStatus() {
         // Test changing user status
         User user = new User("John Doe", "john.doe", "password123", UserType.BASIC);
 
