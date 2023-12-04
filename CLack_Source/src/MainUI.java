@@ -72,7 +72,7 @@ public class MainUI implements GUI{
 		createChatRoomButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String chatUID = "Fix";
-				ChatUI chatUI = new ChatUI(client.openChatRoom(chatUID));
+				ChatUI chatUI = new ChatUI(client, client.openChatRoom(chatUID), false);
 				chatUI.display();
 			}
 		});
@@ -244,7 +244,7 @@ public class MainUI implements GUI{
 					JButton eventSource = (JButton) e.getSource();
 					StringTokenizer strtok = new StringTokenizer(eventSource.getText());
 					String id = strtok.nextToken(":");
-					ChatUI chatUI = new ChatUI(client.openChatRoom(id));	// TODO needs to be implemented on client side
+					ChatUI chatUI = new ChatUI(client, client.openChatRoom(id), false);	// TODO needs to be implemented on client side
 					chatUI.display();
 				}
 			});
@@ -286,7 +286,8 @@ public class MainUI implements GUI{
 			constraints.weighty = 0.5;
 			constraints.gridy = i;
 			constraints.gridx = 0;
-			directoryLabels.add(new JLabel(client.getDirectory().elementAt(i).getName()));
+			User user = client.getDirectory().elementAt(i);
+			directoryLabels.add(new JLabel(user.getUserID() + ":" + user.getName()));
 			directoryLabels.elementAt(i).setBorder(BorderFactory.createLineBorder(Color.BLACK));
 			directoryLabels.elementAt(i).setPreferredSize(new Dimension(directoryScrollPane.getWidth(),frame.getHeight()/10));
 			scrollPanel.add(directoryLabels.elementAt(i), constraints);
