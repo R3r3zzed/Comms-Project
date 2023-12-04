@@ -1,11 +1,16 @@
-
-import org.junit.jupiter.api.*;
-import static org.junit.jupiter.api.Assertions.*;
 import java.io.*;
 import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Vector;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.RepeatedTest;
+//import org.junit.jupiter.api.Test;
+import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 
 public class ChatHistoryTest {
     private ChatHistory chatHistory;
