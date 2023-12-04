@@ -14,7 +14,7 @@ import java.util.concurrent.*;
 public class Server {
 	private String logPathString;
 	private Vector<User> listUsers;
-	private Vector<ChatRoom> chatrooms;
+	private Vector<ChatRoom> allChatrooms;
 	private ConcurrentHashMap<String, ConcurrentLinkedQueue<Message>> newMsg;
 	private Logger terminalLogger;
 		
@@ -67,11 +67,11 @@ public class Server {
 	}
 
 	private void setChatrooms(Vector<ChatRoom> chatrooms) {
-		this.chatrooms = chatrooms;
+		this.allChatrooms = chatrooms;
 	}
 
 	public Vector<ChatRoom> getChatrooms() {
-		return chatrooms;
+		return allChatrooms;
 	}
 
 	public void loadInUsers(String directoryFileName) {
@@ -104,7 +104,7 @@ public class Server {
 	
 	public Vector<ChatRoom> getUserChatrooms(String username) {
 		Vector<ChatRoom> userChatroom = new Vector<ChatRoom>();
-	    Iterator<ChatRoom> iterate = chatrooms.iterator();
+	    Iterator<ChatRoom> iterate = allChatrooms.iterator();
         while(iterate.hasNext()) {
 			ChatRoom current = iterate.next();
 			Iterator<User> userIterate = current.getUsers().iterator();
@@ -133,17 +133,17 @@ public class Server {
 		for (int i = 0; i < listOfFiles.length; i++) {		
 			String chatroomFilename = logDirectory + "/"  + listOfFiles[i].getName();
 			try {
-				File fileObj = new File(chatroomFilename);
 				String[] fileSplit = chatroomFilename.replace(".log","").split("/");
 				String chatroomID = fileSplit[fileSplit.length-1];
-				String[] userString = chatroomID.split("-");
+				String[] userIndex = chatroomID.split("-");
 				Vector<User> vectorUsers = new Vector<User>(); 
 				// Get the server version of the User from the username (String)
-				for (int j = 0; j < userString.length; j++){
+				for (int j = 0; j < userIndex.length; j++){
 					Iterator<User> iterate = listUsers.iterator();
 					while(iterate.hasNext()) {
+						int number = Integer.parseInt(userIndex[j]);  
 						User current = iterate.next();
-						if (current.getUsername().matches(userString[j])) {
+						if (current == listUsers.get(number)) {
 							vectorUsers.add(current);
 							break;
 						}
@@ -201,7 +201,7 @@ public class Server {
 		String chatroomID = m.getChatroomID();
 
 		//figure out which chatroom this message belongs to
-		Iterator<ChatRoom> iterate = chatrooms.iterator();
+		Iterator<ChatRoom> iterate = allChatrooms.iterator();
 		ChatRoom foundChatroom = null;
         while(iterate.hasNext()) {
 			ChatRoom current = iterate.next();
@@ -213,11 +213,11 @@ public class Server {
 		//update it if it exist
 		Vector<User> chatroomUsers = null;
 		if (foundChatroom != null){
-			int index = chatrooms.indexOf(foundChatroom);
-			ChatRoom c = chatrooms.get(index);
+			int index = allChatrooms.indexOf(foundChatroom);
+			ChatRoom c = allChatrooms.get(index);
 			c.addMessage(m);
 			c.writeToFile(m);
-			chatrooms.set(index, c);
+			allChatrooms.set(index, c);
 			chatroomUsers = c.getUsers();
 		}
 		//make a new chatroom
@@ -232,7 +232,7 @@ public class Server {
 			ChatRoom newChatroom = new ChatRoom(chatroomID, chatroomUsers, new Vector<Message>(), this.logPathString+"/"+chatroomID+".log" );
 			newChatroom.addMessage(m);
 			newChatroom.writeToFile(m);
-			chatrooms.add(newChatroom);
+			allChatrooms.add(newChatroom);
 		}
 
 		//figure out which users are online
@@ -390,7 +390,8 @@ public class Server {
 						System.out.println(this.currentUser.getUsername() + " is online");
 
 						//send directory
-						objectOutputStream.writeObject(ServerHandler.ServerInfo.getListUsers());
+						Vector<User> userRooms = ServerHandler.ServerInfo.getListUsers();
+						objectOutputStream.writeObject(userRooms);
 						objectOutputStream.flush();
 
 						//get the chatrooms of the user given
