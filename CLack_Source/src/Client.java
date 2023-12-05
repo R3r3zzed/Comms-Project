@@ -282,7 +282,7 @@ public class Client {
                 this.clienSocket.close();
                 System.out.println("CLOSING: client");
                 messageListenerThread.interrupt();
-                // clientUpdaterThread.interrupt();			//TODO implement runnable class
+                clientUpdaterThread.interrupt();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -339,9 +339,11 @@ public class Client {
         		}
         		catch(IOException e) {
         			System.out.println("Failed receiving inputstream in Message Listener");
+        			return;
         		}
         		catch(ClassNotFoundException e) {
         			System.out.println("Wrong Classs sent Message Listener");
+        			return;
         		}
     		}
     	}
