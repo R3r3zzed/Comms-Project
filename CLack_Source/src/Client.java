@@ -248,8 +248,11 @@ public class Client {
     		}
     	}
     	filename += ".log";
+    	ChatRoom newChatRoom = new ChatRoom(chatID, participants, new Vector<Message>(), filename);
+    	rooms.add(newChatRoom);
     	updateUI();
-    	return new ChatRoom(chatID, participants, new Vector<Message>(), filename);
+    	
+    	return newChatRoom;
     }
     
     public void setMainUI(MainUI mainUI) {
