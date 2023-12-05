@@ -6,19 +6,20 @@ import java.util.Vector;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.RepeatedTest;
+// import org.junit.jupiter.api.RepeatedTest;
+import org.junit.BeforeClass;
 //import org.junit.jupiter.api.Test;
 import org.junit.Test;
-import org.junit.jupiter.api.BeforeEach;
+// import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
 
 public class ChatHistoryTest {
-    private ChatHistory chatHistory;
-    private final String testFileName = "testChatHistory.txt";
-    private File testFile;
+    static ChatHistory chatHistory;
+    static final String testFileName = "testChatHistory.txt";
+    static File testFile;
 
-    @BeforeEach
-    public void setUp() throws IOException {
+    @BeforeClass
+    public static void setUp() throws IOException {
         testFile = new File(testFileName);
         testFile.createNewFile(); // Create a new file for each test
         chatHistory = new ChatHistory(testFileName);

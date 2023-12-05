@@ -8,17 +8,18 @@ import java.util.Vector;
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.RepeatedTest;
+import org.junit.BeforeClass;
 //import org.junit.jupiter.api.Test;
 import org.junit.Test;
 
 public class ClientTest {
 
-    private Client client;
-    private final String testServerIP = "localhost";
-    private final int testServerPort = 1235;
+    static Client client;
+    static final String testServerIP = "localhost";
+    static final int testServerPort = 1235;
 
-    @BeforeEach
-    public void setUp() throws IOException {
+    @BeforeClass
+    public static void setUp() throws IOException {
         Socket mockSocket = new Socket(testServerIP, testServerPort);
         client = new Client(mockSocket);
     }

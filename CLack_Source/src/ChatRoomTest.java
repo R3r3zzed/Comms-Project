@@ -5,18 +5,20 @@ import java.util.Date;
 import java.util.Vector;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.jupiter.api.Assertions.*;
+// import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class ChatRoomTest {
-	private ChatRoom chatRoom;
-	private final String chatRoomID = "testChatRoom";
-	private final String testFileName = "testHistory.txt";
-	private Vector<User> users;
-	private User testUser;
+	static ChatRoom chatRoom;
+	static final String chatRoomID = "testChatRoom";
+	static final String testFileName = "testHistory.txt";
+	static Vector<User> users;
+	static User testUser;
 
-	@BeforeEach
-	public void setUp() {
+	@BeforeClass
+	public static void setUp() {
 		users = new Vector<>();
 		testUser = new User("User Name", "user1", "password", UserType.BASIC); // Adjust as needed
 		users.add(testUser);
