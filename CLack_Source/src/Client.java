@@ -17,6 +17,7 @@ public class Client {
     private Vector<User> directory;
     private Vector<ChatRoom> rooms;
     private MainUI mainUI;
+    MessageListener messageListener;
 
 
     public static void main(String args[]) throws UnknownHostException {
@@ -171,18 +172,26 @@ public class Client {
     }
 
     public Vector<ChatRoom> getLogs(String username){
-        Vector<ChatRoom> userChatRooms = null;
-        try {
-            output.writeObject(username);
-            output.flush();
-            userChatRooms = (Vector<ChatRoom>) this.input.readObject();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return userChatRooms;
+    	synchronized(messageListener) {
+    		try {
+        		messageListener.wait();
+        	}
+        	catch(InterruptedException e) {
+        		e.printStackTrace();
+        	}
+            Vector<ChatRoom> userChatRooms = null;
+            try {
+                output.writeObject(username);
+                output.flush();
+                userChatRooms = (Vector<ChatRoom>) this.input.readObject();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            messageListener.notify();
+            return userChatRooms;
+    	}
     }
 
 
@@ -255,5 +264,45 @@ public class Client {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    
+    public void startMessageListener() {
+    	messageListener = new MessageListener(clienSocket, this);
+    	new Thread(messageListener).start();
+    }
+    
+    // handles listening to messages from the Server that are sent by other users
+    // and does the appropriate operations
+    private static class MessageListener implements Runnable{
+    	private final Socket socket;
+    	private final Client client;
+    	
+    	public MessageListener(Socket socket, Client client) {
+    		this.socket = socket;
+    		this.client = client;
+    	}
+    	public void run() {
+    		try{
+    			ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
+    			while(true) {
+    				Message message = (Message) objectInputStream.readObject();
+    				if (message.getType() != msgType.TEXT) {
+    					System.out.println("Got Wrong MessageType in Message Listener");
+    				}
+    				client.updateChatRoom(message.getChatroomID(), message);
+    				
+    				client.mainUI.updateChatScrollPane();
+    				if (client.mainUI.getChatUI() != null) {
+    					client.mainUI.getChatUI().updateMessagesScrollPane();
+    				}
+    			}
+    		}
+    		catch(IOException e) {
+    			System.out.println("Failed receiving inputstream in Message Listener");
+    		}
+    		catch(ClassNotFoundException e) {
+    			System.out.println("Wrong Classs sent Message Listener");
+    		}
+    	}
     }
 }
