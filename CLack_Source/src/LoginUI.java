@@ -71,6 +71,7 @@ public class LoginUI implements GUI {
 					mainUI = new MainUI(client);
 					mainUI.display();
 					client.setMainUI(mainUI);
+					client.startObserverThreads();
 					frame.setVisible(false);
 					frame.dispose();
 				}

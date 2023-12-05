@@ -177,7 +177,6 @@ public class ChatUI implements GUI {
 		}
 		
 		participantScrollPane = new JScrollPane(participantPanel);
-		
 	}
 	
 	public void updateParticipantScrollPane() {

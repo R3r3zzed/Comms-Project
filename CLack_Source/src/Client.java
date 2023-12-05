@@ -4,6 +4,7 @@ import java.net.SocketAddress;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.io.*;
 
 public class Client {
@@ -17,7 +18,10 @@ public class Client {
     private Vector<User> directory;
     private Vector<ChatRoom> rooms;
     private MainUI mainUI;
-    MessageListener messageListener;
+    private Thread messageListenerThread;
+    private Thread clientUpdaterThread;
+    private ConcurrentLinkedQueue<Message> queueMessages;
+    private ConcurrentLinkedQueue<Vector<ChatRoom>> queueLogs;
 
 
     public static void main(String args[]) throws UnknownHostException {
@@ -71,6 +75,8 @@ public class Client {
 
             directory = new Vector<User>();
             rooms = new Vector<ChatRoom>();
+            queueMessages = new ConcurrentLinkedQueue<Message>();
+            queueLogs = new ConcurrentLinkedQueue<Vector<ChatRoom>>();
 
         }catch (IOException e) {
             e.printStackTrace();
@@ -119,7 +125,7 @@ public class Client {
         //update chatroom 
         String chatroomID = m.getChatroomID();
         updateChatRoom(chatroomID, m);
-
+        updateUI();
         //send to the server
         sendMessageToServer(m);
     } 
@@ -172,26 +178,19 @@ public class Client {
     }
 
     public Vector<ChatRoom> getLogs(String username){
-    	synchronized(messageListener) {
-    		try {
-        		messageListener.wait();
-        	}
-        	catch(InterruptedException e) {
-        		e.printStackTrace();
-        	}
-            Vector<ChatRoom> userChatRooms = null;
-            try {
-                output.writeObject(username);
-                output.flush();
-                userChatRooms = (Vector<ChatRoom>) this.input.readObject();
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
+        Vector<ChatRoom> userChatRooms = null;
+        try {
+            output.writeObject(username);
+            output.flush();
+            while(queueLogs.peek() == null) {
+            	// waiting for the message from the server
             }
-            messageListener.notify();
-            return userChatRooms;
-    	}
+            userChatRooms = queueLogs.poll();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
+        return userChatRooms;
     }
 
 
@@ -249,59 +248,98 @@ public class Client {
     		}
     	}
     	filename += ".log";
+    	updateUI();
     	return new ChatRoom(chatID, participants, new Vector<Message>(), filename);
     }
     
     public void setMainUI(MainUI mainUI) {
     	this.mainUI = mainUI;
     }
+    
+    public void updateUI() {
+    	mainUI.updateChatScrollPane();
+    	if(mainUI.getChatUI() == null) {
+    		return;
+    	}
+    	mainUI.getChatUI().updateMessagesScrollPane();
+    }
+    
+    private void pushMessageQueue(Message message) {
+    	queueMessages.add(message);
+    }
+    
+    private void pushLogsQueue(Vector<ChatRoom> logs) {
+    	queueLogs.add(logs);
+    }
+    
     // Close the connection
     public void close() {
         try {
             if (this.clienSocket != null || input != null || output != null)
                 this.clienSocket.close();
                 System.out.println("CLOSING: client");
+                messageListenerThread.interrupt();
+                // clientUpdaterThread.interrupt();			//TODO implement runnable class
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
     
-    public void startMessageListener() {
-    	messageListener = new MessageListener(clienSocket, this);
-    	new Thread(messageListener).start();
+    public void startObserverThreads() {
+    	MessageListener messageListener = new MessageListener(this);
+    	messageListenerThread = new Thread(messageListener);
+    	messageListenerThread.start();
+    	ClientUpdater clientUpdater = new ClientUpdater(this);
+    	clientUpdaterThread = new Thread(clientUpdater);
+    	clientUpdaterThread.start();
+    }
+    
+    private static class ClientUpdater implements Runnable{
+    	private final Client client;
+    	
+    	public ClientUpdater(Client client) {
+    		this.client = client;
+    	}
+    	
+    	public void run() {
+    		while(!Thread.currentThread().isInterrupted()) {
+    			if(client.queueMessages.peek() != null) {
+    				client.updateMessage(client.queueMessages.poll());
+    			}
+    		}
+    	}
     }
     
     // handles listening to messages from the Server that are sent by other users
     // and does the appropriate operations
     private static class MessageListener implements Runnable{
-    	private final Socket socket;
     	private final Client client;
     	
-    	public MessageListener(Socket socket, Client client) {
-    		this.socket = socket;
+    	public MessageListener(Client client) {
     		this.client = client;
     	}
+    	
     	public void run() {
-    		try{
-    			ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
-    			while(true) {
-    				Message message = (Message) objectInputStream.readObject();
-    				if (message.getType() != msgType.TEXT) {
-    					System.out.println("Got Wrong MessageType in Message Listener");
-    				}
-    				client.updateChatRoom(message.getChatroomID(), message);
-    				
-    				client.mainUI.updateChatScrollPane();
-    				if (client.mainUI.getChatUI() != null) {
-    					client.mainUI.getChatUI().updateMessagesScrollPane();
-    				}
-    			}
-    		}
-    		catch(IOException e) {
-    			System.out.println("Failed receiving inputstream in Message Listener");
-    		}
-    		catch(ClassNotFoundException e) {
-    			System.out.println("Wrong Classs sent Message Listener");
+    		while(!Thread.currentThread().isInterrupted()) {
+    			try{
+        			// TODO remove comment
+        			while(true) {
+        				Object object = client.input.readObject();
+        				if(object instanceof Message) {
+        					client.pushMessageQueue((Message) object);
+        				}
+        				else {
+        					client.pushLogsQueue((Vector<ChatRoom>) object);
+        				}
+        				
+        			}
+        		}
+        		catch(IOException e) {
+        			System.out.println("Failed receiving inputstream in Message Listener");
+        		}
+        		catch(ClassNotFoundException e) {
+        			System.out.println("Wrong Classs sent Message Listener");
+        		}
     		}
     	}
     }
