@@ -25,36 +25,37 @@ public class Client {
 
 
     public static void main(String args[]) throws UnknownHostException {
-        Socket s;
+    	System.out.println(System.getProperty("user.dir"));
+    	Socket s = new Socket();
         String ip = "0.0.0.0";
         int port = 42; 
-        BufferedReader br;
-        try { 
-            br = new BufferedReader(new FileReader("./ipFile.txt"));
-            ip = br.readLine();
-            port = Integer.parseInt(br.readLine());
-            br.close();
-        } catch (IOException | NumberFormatException e) {
-            System.out.println("Error with file");
-        }
-
+        BufferedReader filebr;
+        BufferedReader systemInbr = new BufferedReader( new InputStreamReader(System.in));
         while(true){
         try {
-            s = new Socket(ip, port);
+        	try { 
+                filebr = new BufferedReader(new FileReader("./ipFile.txt"));
+                ip = filebr.readLine();
+                port = Integer.parseInt(filebr.readLine());
+                filebr.close();
+            } catch (IOException | NumberFormatException e) {
+                System.out.println("Error with file");
+            }
+            s.connect(new InetSocketAddress(ip, port), 5000);
+            s.setSoTimeout(0);
             OutputStream outputStream = s.getOutputStream();
             Client client = new Client(s);
+            systemInbr.close();
             LoginUI loginScreen = new LoginUI(client);
             loginScreen.display();
             break;
         } catch (IOException e) {
-            Scanner sc = new Scanner(System.in);
-            System.out.println("Oops! Default IP and Port Didn't work...Please provide new ones.");
-            System.out.print("IP: ");
-            ip = sc.nextLine();
-            System.out.print("Port: ");
-            port = sc.nextInt();
-            sc.close();
             try {
+                System.out.println("Oops! Default IP and Port Didn't work...Please provide new ones.");
+                System.out.print("IP: ");
+                ip = systemInbr.readLine();
+                System.out.print("Port: ");
+                port = Integer.parseInt(systemInbr.readLine());
                 FileWriter myWriter = new FileWriter("./ipFile.txt");
                 myWriter.write(ip+"\n");
                 myWriter.write(port+"\n");
