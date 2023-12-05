@@ -41,6 +41,7 @@ public class Client {
             } catch (IOException | NumberFormatException e) {
                 System.out.println("Error with file");
             }
+        	s = new Socket();
             s.connect(new InetSocketAddress(ip, port), 5000);
             s.setSoTimeout(0);
             OutputStream outputStream = s.getOutputStream();
