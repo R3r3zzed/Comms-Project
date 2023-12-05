@@ -59,7 +59,8 @@ public class ChatHistory implements Serializable{
 				}
 			}
 		} catch (IOException | ParseException e) {
-			e.printStackTrace();
+			// e.printStackTrace();
+			System.out.print("Unable  to see the test file in dir");
 			// Depending on your error handling policy, you may want to re-throw, log, or
 			// handle this exception.
 		}
