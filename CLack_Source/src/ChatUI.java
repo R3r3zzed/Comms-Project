@@ -53,7 +53,6 @@ public class ChatUI implements GUI {
 				if (sendMessageTextArea.getText().trim().length() == 0) {
 					return;
 				}
-				JOptionPane.showMessageDialog(frame, sendMessageTextArea.getText());
 				Message message = new Message(client.getCurrentUser().getUsername(), new Date(),
 						chatRoom.getChatID(), msgStatus.SENT, msgType.TEXT, sendMessageTextArea.getText());
 				client.updateMessage(message);

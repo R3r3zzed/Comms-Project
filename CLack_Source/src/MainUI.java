@@ -273,8 +273,7 @@ public class MainUI implements GUI{
 		JPanel scrollPanel = new JPanel();
 		scrollPanel.setLayout(new GridBagLayout());
 		GridBagConstraints constraints = new GridBagConstraints();
-		
-		// TODO waiting for client side implementation 
+		 
 		for(int i = 0; i < client.getChatRooms().size(); i++) {
 			ChatRoom currentChatRoom = client.getChatRooms().elementAt(i);
 			constraints.fill = GridBagConstraints.BOTH;
