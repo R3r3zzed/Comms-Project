@@ -27,8 +27,8 @@ public class Client {
     public static void main(String args[]) throws UnknownHostException {
     	System.out.println(System.getProperty("user.dir"));
     	Socket s = new Socket();
-        String ip = "0.0.0.0";
-        int port = 42; 
+        String ip = "localhost";
+        int port = 1235; 
         BufferedReader filebr;
         BufferedReader systemInbr = new BufferedReader( new InputStreamReader(System.in));
         while(true){
