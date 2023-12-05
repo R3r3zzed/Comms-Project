@@ -3,6 +3,7 @@ import java.util.Vector;
 
 
 public class ChatRoom implements Serializable{
+	private static final long serialVersionUId = 10000000000l;
 	private String chatID;
 	private ChatHistory history;
 	private Vector<Message> roomMessages;
