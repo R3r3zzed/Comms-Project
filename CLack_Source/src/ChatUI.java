@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Date;
@@ -63,6 +64,10 @@ public class ChatUI implements GUI {
 		frame.setVisible(true);
 		frame.getContentPane().add(panel);
 		panel.updateUI();
+		
+		messageScrollPane.validate();
+		JScrollBar scrollBar = messageScrollPane.getVerticalScrollBar();
+		scrollBar.setValue((int)messagePanel.getSize().getHeight());
 	}
 	
 	private void createPanelComponents() {
@@ -122,6 +127,10 @@ public class ChatUI implements GUI {
 			sendMessageButton.setPreferredSize(new Dimension(frame.getWidth() * 1/4, frame.getHeight() * 1/5));
 			panel.add(sendMessageButton, constraints);
 		}
+		
+		messageScrollPane.validate();
+		JScrollBar scrollBar = messageScrollPane.getVerticalScrollBar();
+		scrollBar.setValue((int)messagePanel.getSize().getHeight());
 	}
 	
 	// creates the Labels for the messages
