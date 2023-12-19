@@ -17,9 +17,9 @@ public class MainUI implements GUI{
 	private User currentUser;
 	
 	private JTextField filterDirectoryTextField;
+	private Vector<JCheckBox> selectedUsers;
 	private JButton filterDirectorySubmitButton;
 	private JScrollPane directoryScrollPane;
-	private Vector<JLabel> directoryLabels;
 	
 	private JTextField filterChatRoomTextField;
 	private JButton filterChatRoomSubmitButton;
@@ -69,15 +69,41 @@ public class MainUI implements GUI{
 		// create new chatroom, then open chatroom UI for it
 		createChatRoomButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String prompt = "Enter the ids of the user you want to send a message to with '-' as delimiters";
-				prompt += "\ne.g 0-5-10-13";
-				String chatID = JOptionPane.showInputDialog(prompt);
+				int countSelected = 0;
+				StringTokenizer strtok = null;
+				String chatID = "";
+				String names = "";
+				for(int i = 0; i < selectedUsers.size(); i++) {
+					JCheckBox current = selectedUsers.get(i);
+					if(current.isSelected()) {
+						countSelected++;
+						strtok = new StringTokenizer(current.getText());
+						chatID += strtok.nextToken(":") + "-";
+						names += strtok.nextToken(":") + ",";
+					}
+				}
+				names += "\b";		// remove excess ","
+				if (countSelected < 1) {
+					JOptionPane.showMessageDialog(panel, "You must select at least one other user to create a Chat Room");
+					return;
+				}
+				
+				String prompt = "Create a room with the following participants?\n" + names;
+				int isConfirmed = JOptionPane.showConfirmDialog(panel, prompt);
+				if(isConfirmed != 0) {
+					// unselect all selected Users
+					for(int i = 0; i < selectedUsers.size(); i++) {
+						selectedUsers.get(i).setSelected(false);
+					}
+					return;
+				}
+				
 				chatID = chatID.trim();		// remove all whitespace
 				
 				Vector<User> participants = new Vector<User>();
 				
 				// parse the input
-				StringTokenizer strtok = new StringTokenizer(chatID);
+				strtok = new StringTokenizer(chatID);
 				boolean isCurrentUserAdded = false;
 				
 				while (strtok.hasMoreTokens()) {
@@ -132,6 +158,10 @@ public class MainUI implements GUI{
 				
 				chatUI = new ChatUI(client, client.openChatRoom(chatID), false);
 				chatUI.display();
+				// unselect all selected Users
+				for(int i = 0; i < selectedUsers.size(); i++) {
+					selectedUsers.get(i).setSelected(false);
+				}
 			}
 		});
 		
@@ -173,7 +203,7 @@ public class MainUI implements GUI{
 		filterDirectoryTextField = new JTextField();
 		filterDirectorySubmitButton = new JButton("filter Directory");
 		
-		directoryLabels = new Vector<JLabel>();
+		selectedUsers = new Vector<JCheckBox>();
 		directoryScrollPane = new JScrollPane();
 		chatRoomButtons = new Vector<JButton>();
 		chatScrollPane = new JScrollPane();
@@ -335,7 +365,7 @@ public class MainUI implements GUI{
 	// create the Labels for each user in directory
 	// displays the name of the user;
 	private void createDirectoryLabels() {
-		directoryLabels.clear();
+		selectedUsers.clear();
 		JPanel scrollPanel = new JPanel();
 		scrollPanel.setLayout(new GridBagLayout());
 		GridBagConstraints constraints = new GridBagConstraints();
@@ -347,10 +377,10 @@ public class MainUI implements GUI{
 			constraints.gridy = i;
 			constraints.gridx = 0;
 			User user = client.getDirectory().elementAt(i);
-			directoryLabels.add(new JLabel(user.getUserID() + ":" + user.getName()));
-			directoryLabels.elementAt(i).setBorder(BorderFactory.createLineBorder(Color.BLACK));
-			directoryLabels.elementAt(i).setPreferredSize(new Dimension(directoryScrollPane.getWidth(),frame.getHeight()/10));
-			scrollPanel.add(directoryLabels.elementAt(i), constraints);
+			selectedUsers.add(new JCheckBox(user.getUserID() + ":" + user.getName()));
+			selectedUsers.elementAt(i).setBorder(BorderFactory.createLineBorder(Color.BLACK));
+			selectedUsers.elementAt(i).setPreferredSize(new Dimension(directoryScrollPane.getWidth(),frame.getHeight()/10));
+			scrollPanel.add(selectedUsers.elementAt(i), constraints);
 		}
 		directoryScrollPane = new JScrollPane(scrollPanel);
 	}
@@ -365,10 +395,10 @@ public class MainUI implements GUI{
 		// look through list of users. If user's name contains substring filter then create make JLabel visible for it
 		for(int i = 0; i < client.getDirectory().size();i++) {
 			if(client.getDirectory().elementAt(i).getName().toUpperCase().contains(filter.toUpperCase())) {
-				directoryLabels.elementAt(i).setVisible(true);
+				selectedUsers.elementAt(i).setVisible(true);
 			}
 			else {
-				directoryLabels.elementAt(i).setVisible(false);
+				selectedUsers.elementAt(i).setVisible(false);
 			}
 		}
 		directoryScrollPane.updateUI();
