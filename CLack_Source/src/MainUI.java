@@ -82,12 +82,13 @@ public class MainUI implements GUI{
 						names += strtok.nextToken(":") + ",";
 					}
 				}
-				names += "\b";		// remove excess ","
+				
 				if (countSelected < 1) {
 					JOptionPane.showMessageDialog(panel, "You must select at least one other user to create a Chat Room");
 					return;
 				}
 				
+				names = names.substring(0, names.length() - 1);		// remove trailing comma
 				String prompt = "Create a room with the following participants?\n" + names;
 				int isConfirmed = JOptionPane.showConfirmDialog(panel, prompt);
 				if(isConfirmed != 0) {
